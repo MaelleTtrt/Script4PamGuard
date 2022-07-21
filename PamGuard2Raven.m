@@ -4,7 +4,7 @@ clear;clc
 main_path = cd;
 
 %Selection of the folder including the PAMGuard functions
-addpath(genpath(uigetdir('','Select folder contening PAMGuard functions')));
+addpath(genpath(uigetdir('','Select folder contening PAMGuard MATLAB functions')));
 
 [audio_name, audio_path] = uigetfile('*.wav','Select wav file');
 
@@ -17,7 +17,7 @@ datenum_day = str2double(inputdlg('Day ? (DD)'));
 datenum_hour = str2double(inputdlg('Hour ? (HH)'));
 datenum_minute = str2double(inputdlg('Minute ? (MM)'));
 datenum_second = str2double(inputdlg('Second ? (SS)'));
-datenum_1stF = datenum(datenum_year,datenum_month,datenum_day, datenum_hour,datenum_minute,datenum_minute);
+datenum_1stF = datenum(datenum_year,datenum_month,datenum_day, datenum_hour,datenum_minute,datenum_second);
 
 
 
@@ -30,24 +30,28 @@ Fs = wavinfo.SampleRate;
 nb_samples_files = wavinfo.TotalSamples;
 
 
-% Load data PAMGuard
-% folder_data_PG = 'C:\Users\torterma\Documents\Projets_Osmose\Sciences\1_PerformanceEvaluation\Benchmark\PAMGuard\Results\WhistleMoanDet\3\20190302';
-% type_data = 'WhistlesMoans_Whistle_and_Moan_Detector_Contours_*.pgdf';
-[type_data, folder_data_PG] = uigetfile('*.pgdf','Select PAMGuard binary database');
-data = loadPamguardBinaryFolder(folder_data_PG, type_data);
+%% Load data PAMGuard
+folder_data_PG = uigetdir('','Select folder contening PAMGuard binary results');
+msg='Select The datatype that you want to analyse';
+opts=["WhistlesMoans_Whistle_and_Moan_Detector_Contours_*.pgdf" "Click_Detector_Click_Detector_Clicks_*.pgdf"]
+selection_type_data=menu(msg,opts);
+type_data = opts(selection_type_data);
 
-% datenum_files : variable avec les dates des détections en MATLAB
+%% [type_data, folder_data_PG] = uigetdir('*.pgdf','Select PAMGuard binary database');
+data = loadPamguardBinaryFolder(folder_data_PG, convertStringsToChars(type_data));
+
+% datenum_files : variable avec les dates des d?tections en MATLAB
 datenum_det={data(1:end).date};
 datenum_det = cell2mat(datenum_det);
-% duration_det : variable contenant les durée de chaque detection en
+% duration_det : variable contenant les dur?e de chaque detection en
 % secondes
 duration_det = {data(1:end).sampleDuration};
 duration_det = cell2mat(duration_det)/Fs;
-% Nombre de secondes entre le début de la liste de fichiers et le début de chaque detection 
+% Nombre de secondes entre le d?but de la liste de fichiers et le d?but de chaque detection 
 Beg_sec = (datenum_det-datenum_1stF)*24*60*60;
-% Nombre de secondes entre le début de la liste de fichiers et la fin de chaque detection 
+% Nombre de secondes entre le d?but de la liste de fichiers et la fin de chaque detection 
 End_sec = Beg_sec + duration_det;
-% Fréquences limites de chaque détection
+% Fr?quences limites de chaque d?tection
 freqs={data(1:end).freqLimits};
 freqs = cell2mat(freqs);
 Low_freq = freqs(1:2:end);
