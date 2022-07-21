@@ -3,9 +3,12 @@
 clear;clc
 main_path = cd;
 
-[audio_name, audio_path] = uigetfile('*.wav');
+%Selection of the folder including the PAMGuard functions
+addpath(genpath(uigetdir('','Select folder contening PAMGuard functions')));
 
-%addpath(genpath('C:\Users\torterma\Documents\Projets_Osmose\Sciences\1_PerformanceEvaluation\Benchmark\PAMGuard\Script\PamguardMatlab_20210616'));
+[audio_name, audio_path] = uigetfile('*.wav','Select wav file');
+
+%addpath(genpath(uigetdir));
 % Datenum de la date de début du 1er fichier 
 % datenum_1stF = datenum(2022,08,01,00,00,00);
 datenum_year = str2double(inputdlg('Year ? (YYYY)'));
@@ -30,7 +33,7 @@ nb_samples_files = wavinfo.TotalSamples;
 % Load data PAMGuard
 % folder_data_PG = 'C:\Users\torterma\Documents\Projets_Osmose\Sciences\1_PerformanceEvaluation\Benchmark\PAMGuard\Results\WhistleMoanDet\3\20190302';
 % type_data = 'WhistlesMoans_Whistle_and_Moan_Detector_Contours_*.pgdf';
-[type_data, folder_data_PG] = uigetfile('*.pgdf');
+[type_data, folder_data_PG] = uigetfile('*.pgdf','Select PAMGuard binary database');
 data = loadPamguardBinaryFolder(folder_data_PG, type_data);
 
 % datenum_files : variable avec les dates des détections en MATLAB
