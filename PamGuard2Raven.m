@@ -98,8 +98,8 @@ selection_type_data=menu(msg,opts);
 type_data = opts(selection_type_data);
 
 %% [type_data, folder_data_PG] = uigetdir('*.pgdf','Select PAMGuard binary database');
-% data = loadPamguardBinaryFolder(folder_data_PG, convertStringsToChars(type_data));
-data = loadPamguardBinaryFolder(folder_data_PG, convertStringsToChars("WhistlesMoans_Whistle_and_Moan_Detector_0_Contours*.pgdf"));
+data = loadPamguardBinaryFolder(folder_data_PG, convertStringsToChars(strcat(type_data,"*.pgdf")));
+% data = loadPamguardBinaryFolder(folder_data_PG, convertStringsToChars("WhistlesMoans_Whistle_and_Moan_Detector_0_Contours*.pgdf"));
 
 % datenum_files : variable avec les dates des d?tections en MATLAB
 datenum_det={data(1:end).date};
