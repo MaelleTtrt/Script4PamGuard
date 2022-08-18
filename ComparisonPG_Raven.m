@@ -4,23 +4,34 @@
 %Then the timebin is considered relevant, i.e. timebin(i) = 1
 
 clear;clc
-main_path = cd;
-time_bin = str2double(inputdlg("time bin ? (s)"));
 
-% % Import formatted PG detections
-% [PG_data, PG_datapath] = uigetfile('*.txt','Select PG detections');
-% PG_Annotation = sortrows(importRavenSelectionTable(strcat(PG_datapath,PG_data)),1);
-% PG_output = Box2Timebin(PG_Annotation,time_bin);
-% 
-% % Import Raven annotations
-% [R_data, R_datapath] = uigetfile('*.txt','Select Raven annotations');
-% R_Annotation = sortrows(importRavenSelectionTable(strcat(R_datapath,R_data)),1);
-% R_output = Box2Timebin(R_Annotation,time_bin);
+% time_bin = str2double(inputdlg("time bin ? (s)"));
+time_bin = 10;
 
-% Import Aplose annotations
-[R_data, R_datapath] = uigetfile('*.txt','Select Raven annotations');
+folder_data_wav= uigetdir('','Select folder contening wav files');
+if folder_data_wav == 0
+    clc; disp("Select folder contening wav files - Error");
+    return
+end
+
+% Import formatted PG detections
+[PG_data, PG_datapath] = uigetfile(strcat(folder_data_wav,'/*.txt'),'Select PG detections');
+if PG_data == 0
+    clc; disp("Select PG detections - Error");
+    return
+end
+PG_Annotation = sortrows(importRavenSelectionTable(strcat(PG_datapath,PG_data)),1);
+PG_output = Box2Timebin(PG_Annotation,time_bin, folder_data_wav);
+
+% Import Raven annotations
+[R_data, R_datapath] = uigetfile(strcat(folder_data_wav,'/*.txt'),'Select Raven annotations');
+if PG_data == 0
+    clc; disp("Select Raven annotations - Error");
+    return
+end
 R_Annotation = sortrows(importRavenSelectionTable(strcat(R_datapath,R_data)),1);
-R_output = Box2Timebin(R_Annotation,time_bin);
+R_output = Box2Timebin(R_Annotation,time_bin, folder_data_wav);
+
 
 %%
 comparison = "";
