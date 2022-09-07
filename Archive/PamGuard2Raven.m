@@ -1,5 +1,4 @@
-%% Fonction qui permet de transformer les résultats de détection de PAMGuard
-% dans les fichiers binaires en Selection Table de Raven
+%% Fonction qui permet de transformer les résultats de détection de PAMGuard binaires en Selection Table de Raven
 clear;clc
 
 %Selection of the folder including the PAMGuard functions
@@ -25,21 +24,6 @@ end
 wavDates_formated = datetime(wavDates, 'InputFormat', 'yyMMddHHmmss', 'Format', 'yyyy MM dd - HH mm ss');
 [FirstDate, posMin] = min(wavDates_formated);
 
-% [audio_name, folder_data_wav] = uigetfile('*.wav','Select wav file');
-
-% % % %addpath(genpath(uigetdir));
-% % % % Datenum de la date de début du 1er fichier 
-% % % % datenum_1stF = datenum(2022,08,01,00,00,00);
-% % % datenum_year = str2double(inputdlg('Year ? (YYYY)'));
-% % % datenum_month = str2double(inputdlg('Month ? (MM)'));
-% % % datenum_day = str2double(inputdlg('Day ? (DD)'));
-% % % datenum_hour = str2double(inputdlg('Hour ? (HH)'));
-% % % datenum_minute = str2double(inputdlg('Minute ? (MM)'));
-% % % datenum_second = str2double(inputdlg('Second ? (SS)'));
-% % % datenum_1stF = datenum(datenum_year,datenum_month,datenum_day, datenum_hour,datenum_minute,datenum_second);
-
-
-
 wavinfo = audioinfo(strcat(folder_data_wav,"\",string(wavNames(posMin,:))));
 % % % % Durée des fichiers audio en secondes
 % % % duration_files = wavinfo.Duration;
@@ -50,7 +34,7 @@ Fs = wavinfo.SampleRate;
 
 
 %% Load data PAMGuard
-folder_data_PG = uigetdir('','Select folder contening PAMGuard binary results');
+folder_data_PG = uigetdir(folder_data_wav,'Select folder contening PAMGuard binary results');
 if folder_data_PG == 0
     clc; disp("Select folder contening PAMGuard binary results - Error");
     return

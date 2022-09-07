@@ -1,13 +1,12 @@
 %% Fonction qui permet de transformer les résultats de détection de PAMGuard
 % dans les fichiers binaires en output APLOSE
 clear;clc
-main_path = cd;
 DATASET_NAME = "Glider_SPAms_60files_test_PAMGuard";
-% DATASET_NAME = str2double(inputdlg("Dataset name ?"));
-Label= 'whistle and moan';
-% Label = str2double(inputdlg("Label ?"));
-Annotator = 'PAMGuard Whistle and Moan detector';
-% Annotator = str2double(inputdlg("Annotator ?"));
+% % DATASET_NAME = str2double(inputdlg("Dataset name ?"));
+Label= "whistle and moan";
+% % Label = str2double(inputdlg("Label ?"));
+Annotator = "mdupont";
+% % Annotator = str2double(inputdlg("Annotator ?"));
 
 %Selection of the folder including the PAMGuard functions
 addpath(genpath(uigetdir('','Select folder contening PAMGuard MATLAB functions')));
@@ -22,8 +21,10 @@ wavNames = "";
 wavDates = "";
 for i = 1:length(wavList)
     wavNames(i,:) = string(wavList(i).name);   
-    splitDates = split(wavNames(i,:),"_");
-    wavDates(i,:) = splitDates(3) + splitDates(4);
+    splitDates = split(wavNames(i,:),".");
+%     wavDates(i,:) = splitDates(3) + splitDates(4);
+    wavDates(i,:) = splitDates(2);
+
 end
 
 wavDates_formated = datetime(wavDates, 'InputFormat', 'yyMMddHHmmss', 'Format', 'yyyy MM dd - HH mm ss');
@@ -37,7 +38,7 @@ Fs = wavinfo.SampleRate;
 
 
 % Load data PAMGuard
-folder_data_PG = uigetdir('','Select folder contening PAMGuard binary results');
+folder_data_PG = uigetdir(folder_data_wav,'Select folder contening PAMGuard binary results');
 
 %List of all .pgdf dates
 PG_List = dir(fullfile(folder_data_PG, '*.pgdf'));
@@ -70,7 +71,6 @@ for i =1:length(k)
     detectorNames2(i,1) = string(detectorChar(1,1:end-21));
 end
 
-
 msg='Select The detector to analyse';
 opts=[detectorNames2];
 selection_type_data=menu(msg,opts);
@@ -79,15 +79,17 @@ type_data = opts(selection_type_data);
 
 % Formating the data for APLOSE
 
-data = loadPamguardBinaryFolder(folder_data_PG, convertStringsToChars(strcat(type_data,"*.pgdf")));
+data = loadPamguardBinaryFolder(folder_data_PG, convertStringsToChars(strcat(type_data,"*.pgdf")) );
+
+% datestr(cell2mat({data.date}')) %% j'obtiens des date antérieures au début du fichier wav ????????????????????????????
+
+
 
 % datenum_files : variable avec les dates des detections en MATLAB
-datenum_det={data(1:end).date};
-datenum_det = cell2mat(datenum_det);
+datenum_det = cell2mat({data.date})';
 
 % duration_det : variable contenant les durees de chaque detection en secondes
-duration_det = {data(1:end).sampleDuration};
-duration_det = cell2mat(duration_det)/Fs;
+duration_det = (cell2mat({data.sampleDuration})/Fs)';
 
 % Nombre de secondes entre le debut de la liste de fichiers et le debut de chaque detection 
 Beg_sec = (datenum_det-datenum_1stF)*24*60*60;
@@ -102,21 +104,20 @@ End_sec = Beg_sec + duration_det;
 % apparaitre quand même dans le csv de résultat pour qu'il ait la même
 % forme qu'un csv de résultat APLOSE
 L = length(data);
-list_dataset(1:L,1) = string(DATASET_NAME);
+list_dataset(1:L,1) = DATASET_NAME;
 list_files(1:L,1)= [0];
 list_start_time(1:L,1)= [0];
 list_end_time(1:L,1)= [0];
 
 % Fréquences limites de chaque détection
-freqs={data(1:end).freqLimits};
-freqs = cell2mat(freqs);
-list_start_frequency = freqs(1:2:end)';
-list_end_frequency = freqs(2:2:end)';
-list_annotation(1:L,1) = string(Label);
-list_annotators(1:L,1) = string(Annotator);
+freqs=cell2mat({data.freqLimits}');
+list_start_frequency = freqs(:,1);
+list_end_frequency = freqs(:,2);
+list_annotation(1:L,1) = Label;
+list_annotators(1:L,1) = Annotator;
 
 timezone = '+00:00';
-datenum_det_end = (datenum_det + duration_det/(24*60*60)) ;
+datenum_det_end = (datenum_det + (duration_det/(24*60*60)) ) ;
 % date début de détection
 list_start_datetime=string(datestr(datenum_det, ['yyyy-mm-ddTHH:MM:SS.FFF' timezone]));
 % date fin de détection
@@ -125,7 +126,7 @@ list_end_datetime=string(datestr(datenum_det_end, ['yyyy-mm-ddTHH:MM:SS.FFF' tim
 C = [list_dataset, list_files,list_start_time, list_end_time, list_start_frequency, list_end_frequency,list_annotation,list_annotators, list_start_datetime, list_end_datetime];
 
 %%Generate APLOSE csv
-file_name = [strcat(folder_data_wav,"\","test.csv")]
+file_name = [strcat(folder_data_wav,"\","PG_detections.csv")]
 selec_table = fopen(file_name, 'wt');     % create a text file with the same name than the manual selction table + SRD at the end
     
 fprintf(selec_table,'%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n', 'dataset','filename','start_time','end_time','start_frequency','end_frequency','annotation','annotator','start_datetime','end_datetime');

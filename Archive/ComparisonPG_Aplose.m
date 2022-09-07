@@ -1,10 +1,7 @@
 %% This script compares PG detections vs Manual Aplose annotations
-
 clear;clc
-% time_bin = str2double(inputdlg("time bin ? (s)")); 
-time_bin = 600;
 
-%% Time vector creation
+% Time vector creation
 %Here we find the duration of the dataset with the begin time 
 %of the first file and the begin time and duration of the last file
 
@@ -19,8 +16,8 @@ wavNames = "";
 wavDates = "";
 for i = 1:length(wavList)
     wavNames(i,:) = (wavList(i).name);
-    splitDates = split(wavNames(i,:),"_");
-    wavDates(i,:) = splitDates(3) + splitDates(4);
+    splitDates = split(wavNames(i,:),".");
+    wavDates(i,:) = splitDates(2);
 end
 
 wavDates_formated = datetime(wavDates, 'InputFormat', 'yyMMddHHmmss', 'Format', 'yyyy MM dd - HH mm ss');
@@ -28,6 +25,13 @@ wavDates_formated = datetime(wavDates, 'InputFormat', 'yyMMddHHmmss', 'Format', 
 [LastDate, posMax] = max(wavDates_formated);
 
 lastwavinfo = audioinfo(strcat(folder_data_wav,"\",string(wavNames(posMax,:))));
+
+firstwavinfo = audioinfo(strcat(folder_data_wav,"\",string(wavNames(posMin,:))));
+% time_bin = str2double(inputdlg("time bin ? (s)")); 
+% time_bin = 7199;
+time_bin = firstwavinfo.Duration;
+
+
 
 
 %Creation of a datenum time vector from beginning of 1st file to end of last file with time_bin as a
@@ -58,7 +62,6 @@ if Ap_data == 0
     return
 end
 Ap_Annotation = importAploseSelectionTable(strcat(Ap_datapath,Ap_data));
-Ap_Annotation(1,:)=[];
 
 msg='Select The annotion type to analyse';
 opts=[unique(Ap_Annotation.annotation )];
@@ -67,12 +70,22 @@ type_selected = opts(selection_type_data);
 counter = find(Ap_Annotation.annotation ~= type_selected);
 Ap_Annotation(counter,:)=[];
 
-splitDates = split(Ap_Annotation.filename,"_");
-Annot_Dates = splitDates(:,3) + splitDates(:,4);
-Annot_Dates_formated = datetime(Annot_Dates, 'InputFormat', 'ddMMyyHHmmss', 'Format', 'yyyy MM dd - HH mm ss');
+% splitDates = split(Ap_Annotation.filename,"_");
+% Annot_Dates = "";
+% for i = 1:height(Ap_Annotation)
+%     splitDates = strsplit(Ap_Annotation.filename(i),{'_','.'});
+%     Annot_Dates(i,1) = splitDates(2);
+% end
+% % Annot_Dates = splitDates(:,3) + splitDates(:,4);
+% Annot_Dates_formated = datetime(Annot_Dates, 'InputFormat', 'yyMMddHHmmss', 'Format', 'yyyy MM dd - HH mm ss');
 
-datenum_Ap_begin = datenum(Annot_Dates_formated)*24*3600;
-datenum_Ap_end = datenum_Ap_begin + time_bin;
+
+datenum0 = char(strrep(Ap_Annotation.start_datetime,'T',' '));
+datenum_Ap_begin = datenum(datenum0(:,1:end-6))*24*3600;
+
+duration_det = double(Ap_Annotation.end_time) - double(Ap_Annotation.start_time);
+datenum_Ap_end = datenum_Ap_begin + duration_det;
+
 datenum_Ap = [datenum_Ap_begin, datenum_Ap_end];
 
 
@@ -85,9 +98,10 @@ if PG_data == 0
 end
 
 PG_Annotation = importPG_csvSelectionTable(strcat(PG_datapath,PG_data));
-PG_Annotation(1,:)=[];
-PG_Annotation_begin = char(string(table2cell(PG_Annotation(:,1))));
-PG_Annotation_end = char(string(table2cell(PG_Annotation(:,2))));
+% PG_Annotation_begin = char(string(table2cell(PG_Annotation(:,1))));
+PG_Annotation_begin = char(PG_Annotation.start_datetime);
+PG_Annotation_end = char(PG_Annotation.end_datetime);
+% PG_Annotation_end = char(string(table2cell(PG_Annotation(:,2))));
 PG_Annotation_begin2 = "";
 PG_Annotation_end2 = "";
 for i =1:length(PG_Annotation_begin)
@@ -180,14 +194,13 @@ for i = 1:length(time_vector_f)-1
     end
     clc; disp([ num2str(i),'/',num2str(length(time_vector_f)-1) ])
 end
-clc;toc
+clc; elapsed_time = toc
 %elapsed time ~115s
 
 %% Comparison of time vectors / PG detection vector - method 2
 tic
 interval_t = fixed.Interval(time_vector_f(1:end-1), time_vector_f(2:end) );
 
-% interval_Annot = fixed.Interval(datenum_PG(:,1),datenum_PG(:,2)); %long process time here
 parfor i = 1:length(datenum_PG)
     interval_Annot(i) = fixed.Interval(datenum_PG(i,1),datenum_PG(i,2));
 end
@@ -197,8 +210,8 @@ parfor i = 1:length(interval_Annot)
 end
 
 PG_output2 = any(overlap_PG_Ap,2);
-toc
-%elapsed time ~25s
+clc; elapsed_time2 = toc
+%elapsed time ~20s
 
 %% Result - method 1
 comparison = "";

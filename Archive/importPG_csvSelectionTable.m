@@ -1,4 +1,4 @@
-function test = importAploseSelectionTable(filename, dataLines)
+function test = importPG_csvSelectionTable(filename, dataLines)
 %IMPORTFILE Import data from a text file
 %  TEST = IMPORTFILE(FILENAME) reads data from text file FILENAME for
 %  the default selection.  Returns the data as a table.
@@ -30,8 +30,8 @@ opts.DataLines = dataLines;
 opts.Delimiter = ",";
 
 % Specify column names and types
-opts.VariableNames = ["Var1", "Var2", "Var3", "Var4", "Var5", "Var6", "Var7", "Var8", "start_datetime", "end_datetime"];
-opts.SelectedVariableNames = ["start_datetime", "end_datetime"];
+opts.VariableNames = ["dataset", "filename", "start_time", "end_time", "start_frequency", "end_frequency", "annotation", "annotator", "start_datetime", "end_datetime"];
+opts.SelectedVariableNames = ["start_frequency", "end_frequency", "start_datetime", "end_datetime"];
 opts.VariableTypes = ["string", "string", "string", "string", "string", "string", "string", "string", "string", "string"];
 
 % Specify file level properties
@@ -39,10 +39,11 @@ opts.ExtraColumnsRule = "ignore";
 opts.EmptyLineRule = "read";
 
 % Specify variable properties
-opts = setvaropts(opts, ["Var1", "Var2", "Var3", "Var4", "Var5", "Var6", "Var7", "Var8", "start_datetime", "end_datetime"], "WhitespaceRule", "preserve");
-opts = setvaropts(opts, ["Var1", "Var2", "Var3", "Var4", "Var5", "Var6", "Var7", "Var8", "start_datetime", "end_datetime"], "EmptyFieldRule", "auto");
+opts = setvaropts(opts, ["start_time", "end_time", "start_frequency", "end_frequency", "start_datetime", "end_datetime", "filename"], "WhitespaceRule", "preserve");
+opts = setvaropts(opts, ["start_time", "end_time", "start_frequency", "end_frequency", "start_datetime", "end_datetime", "filename"], "EmptyFieldRule", "auto");
 
 % Import the data
 test = readtable(filename, opts);
+test(1,:) = [];
 
 end
