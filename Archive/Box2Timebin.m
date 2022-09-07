@@ -1,4 +1,4 @@
-function [output] = Box2Timebin(Annotation,time_bin)
+function [output] = Box2Timebin(Annotation, time_bin, wav_path)
 %Here the dataset is divided into time bins
 %If there is an overlap between a detection and a the corresponding time
 %bin, then the detection is considered a true positive
@@ -6,7 +6,8 @@ function [output] = Box2Timebin(Annotation,time_bin)
 
 %Here we find the duration of the dataset with the begin time of the first
 %file and the begin time and duration of the last file
-folder_data_wav= uigetdir('','Select folder contening wav files');
+% folder_data_wav= uigetdir('','Select folder contening wav files');
+folder_data_wav = wav_path;
 wavList = dir(fullfile(folder_data_wav, '*.wav'));
 wavNames = '';
 wavDates = "";
