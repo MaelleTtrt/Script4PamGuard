@@ -1,23 +1,21 @@
-function [data_table, data_path, data_name] = importBinary(folder_data_wav, folder_data_PG)
+function [data_table, data_path, data_name] = importBinary(folder_data_wav, WavFolderInfo, folder_data_PG, index_exclude)
 %Fonction qui permet d'extraire et de convertir les résultats de détection de PAMGuard binaires
 
-%Selection of the folder including the PAMGuard functions
-% addpath(genpath(uigetdir('','Select folder contening PAMGuard MATLAB functions')));
-% addpath(genpath('C:\Users\dupontma2\Pamguard\pgmatlab'));
+% % % % List of all .wav dates
+% % % wavList = dir(fullfile(folder_data_wav, '*.wav'));
+% % % wavNames = string(extractfield(wavList, 'name')');
+% % % splitDates = split(wavNames, [".","_"," - "],2);
+% % % wavDates = splitDates(:,2);
+% % % % wavDates = strcat(splitDates(:,2),'-',splitDates(:,3));
+% % % wavDates_formated = datetime(wavDates, 'InputFormat', 'yyMMddHHmmss', 'Format', 'yyyy MM dd - HH mm ss');
+% % % % wavDates_formated = datetime(wavDates, 'InputFormat', 'yyyy-MM-dd-HH-mm-ss', 'Format', 'yyyy MM dd - HH mm ss');
 
-
-% List of all .wav dates
-wavList = dir(fullfile(folder_data_wav, '*.wav'));
-wavNames = string(extractfield(wavList, 'name')');
-splitDates = split(wavNames, '.',2);
-wavDates = splitDates(:,2);
-wavDates_formated = datetime(wavDates, 'InputFormat', 'yyMMddHHmmss', 'Format', 'yyyy MM dd - HH mm ss');
-for i = 1:length(wavList)
-    wavinfo(i) = audioinfo(strcat(folder_data_wav,"\",string(wavNames(i,:))));
-end
+% % % for i = 1:length(wavList)
+% % %     wavinfo(i) = audioinfo(strcat(folder_data_wav,"\",string(wavNames(i,:))));
+% % % end
 
 % Sampling frequency
-Fs = wavinfo(1).SampleRate;
+Fs = WavFolderInfo.wavinfo(1).SampleRate;
 
 
 %List of all .pgdf dates
@@ -64,28 +62,60 @@ data = loadPamguardBinaryFolder(folder_data_PG, convertStringsToChars(strcat(typ
 datenum_det={data(1:end).date};
 datenum_det = cell2mat(datenum_det);
 
+
 % duration_det : variable contenant les durees de chaque detection en secondes
-duration_det = {data(1:end).sampleDuration};
+duration_det = {data(1:end).sampleDuration}';
 duration_det = cell2mat(duration_det)/Fs;
+
+% datetime_begin = string(datestr(datenum_det));
+% datetime_end =  string(datestr( ((datenum_det*24*3600)+(duration_det))/(3600*24) ));
+datetime_begin = datetime(datenum_det','ConvertFrom','datenum','Format','yyyy MM dd - HH mm ss');
+datetime_end = datetime_begin + seconds(duration_det);
+
+% idx_wav = floor(cell2mat({data(1:end).UID}' )/1000000);
+% filename_formated = WavFolderInfo.wavDates_formated(1);
+
+% %Adjustment of the timestamps test
+% for i =1:height(datetime_begin)
+%     idx = find(filename_formated(i) == WavFolderInfo.wavDates_formated);
+%     if idx ~= 1
+% 
+%         adjust = datetime(time_vector(index_exclude(idx-1)+1)/3600/24,'ConvertFrom','datenum')-WavFolderInfo.wavDates_formated(idx);
+%         %index_exclude : indexes of last bins before new wav, then
+%         %index_exclude(i)+1 : indexes of first timebin of a wav i+1
+% 
+%         datetime_begin2(i,1) = datetime_begin(i,1) + adjust;
+%         datetime_end2(i,1) =  datetime_end(i,1) +  adjust;
+%     else
+%         datetime_begin2(i,1) = datetime_begin(i,1);
+%         datetime_end2(i,1) =  datetime_end(i,1);
+%     end
+% end
+
 % Nombre de secondes entre le debut de la liste de fichiers et le debut de chaque detection 
-Beg_sec = (datenum_det-datenum_1stF)*24*60*60;
+Beg_sec = (datenum_det-datenum_1stF)'*24*60*60;
+Beg_sec2 = seconds(datetime_begin-FirstDate)+0;
+
 % Nombre de secondes entre le debut de la liste de fichiers et la fin de chaque detection 
 End_sec = Beg_sec + duration_det;
+End_sec2 = Beg_sec2 + duration_det;
+
 % Frequences limites de chaque detection
-freqs={data(1:end).freqLimits};
+freqs={data(1:end).freqLimits}';
 freqs = cell2mat(freqs);
-Low_freq = freqs(1:2:end);
-High_freq = freqs(2:2:end);
-
-datetime_begin = string(datestr(datenum_det));
-datetime_end =  string(datestr( ((datenum_det*24*3600)+(duration_det))/(3600*24) ));
+Low_freq = freqs(1:2:end)';
+High_freq = freqs(2:2:end)';
 
 
-data_table = [ array2table([Beg_sec', End_sec', Low_freq', High_freq'],...
+data_table = [ array2table([Beg_sec2, End_sec2, Low_freq, High_freq],...
     'VariableNames',{'Begin_time','End_time','Low_Freq','High_Freq'})...
-    , table(datetime_begin, datetime_end), array2table([End_sec-Beg_sec]','VariableNames',{'Duration (s)'}')];
+    , table(datetime_begin, datetime_end), array2table([End_sec2-Beg_sec2],'VariableNames',{'Duration (s)'}')];
+
 
 clc
+
+
+
 
 end
 
