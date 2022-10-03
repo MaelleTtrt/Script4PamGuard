@@ -14,17 +14,33 @@ if (vect2(2) >= vect1(1) && vect2(1) <= vect1(2) ) || (vect1(2) >= vect2(1) && v
     intersection = 1;
     
     if vect1(1)<=vect2(1) && vect1(2)<=vect2(2)
-        interval = [vect2(1) vect1(2)];        
+        if abs(vect2(1)- vect1(2)) < 1 % less than 1sec
+            interval = [];  
+        else
+            interval = [vect2(1) vect1(2)];
+        end
     elseif vect2(1)<=vect1(1) && vect2(2)<=vect1(2)
-        interval = [vect1(1) vect2(2)];
+        if abs(vect1(1)- vect2(2))  < 1 % less than 1sec
+            interval = [];  
+        else
+            interval = [vect1(1) vect2(2)];
+        end
     elseif vect1(1)>=vect2(1) && vect1(2)<=vect2(2)
-        interval = vect1 ;
+        interval = vect1;
     elseif vect2(1)>=vect1(1) && vect2(2)<=vect1(2)
-        interval = vect2 ;
+        interval = vect2;
     elseif vect1(1)>=vect2(1) && vect1(2)>=vect2(2)
-        interval = [vect1(1) vect2(2)];      
+        if abs(vect1(1)- vect2(2)) < 1
+            interval = [vect1(1) vect2(2)];   
+        else
+            interval = [];  
+        end
     elseif vect2(1)>=vect1(1) && vect2(2)>=vect1(2)
-        interval = [vect2(1) vect1(2)];        
+        if abs(vect2(1)- vect1(2)) < 1
+            interval = [];  
+        else
+            interval = [vect2(1) vect1(2)]; 
+        end
     end
     
 

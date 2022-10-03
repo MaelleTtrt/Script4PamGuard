@@ -8,10 +8,15 @@
 % % % % % %Aplose box, a PG box with the same timestamps is created.
 %The formatted PG vector and Aplose vector are then compared to estimate the performances of the PG detector   
 
+% Computation time ~1min for a 24h period
+
 clear;clc
 
 %Add path with matlab functions from PG website
-addpath(genpath('C:\Users\dupontma2\Pamguard\pgmatlab'));
+addpath(genpath('U:\Documents\Pamguard\pgmatlab'));
+%Add path with matlab functions from PG website
+addpath(genpath('L:\acoustock\Bioacoustique\DATASETS\APOCADO\Code_MATLAB'));
+
 
 %wav folder
 folder_data_wav= uigetdir('','Select folder contening wav files');
@@ -20,48 +25,73 @@ if folder_data_wav == 0
     return
 end
 
+%data folder
+folder_data = fileparts(folder_data_wav);
 %Aplose annotation csv file
-[Ap_data_name, Ap_datapath] = uigetfile(strcat(folder_data_wav,'/*.csv'),'Select Aplose annotations');
+[Ap_data_name, Ap_datapath] = uigetfile(strcat(fileparts(folder_data_wav),'/*.csv'),'Select Aplose annotations');
 if Ap_data_name == 0
     clc; disp("Select Aplose annotations - Error");
     return
 end
 
 %Binary folder
-folder_data_PG = uigetdir(folder_data_wav,'Select folder contening PAMGuard binary results');
+folder_data_PG = uigetdir(folder_data,'Select folder contening PAMGuard binary results');
 if folder_data_PG == 0
     clc; disp("Select folder contening PAMGuard binary results - Error");
     return
 end
 
+%If choice = 1, all the wave are analysed
+%If choice = 2, the user define a range of study
+%TODO : gérer erreurs input
+choice = 2;
+
+switch choice
+    case 2
+    input1 = string(inputdlg("Date & Time beginning (dd MM yyyy HH mm ss) :"));
+    input2 = string(inputdlg("Date & Time ending (dd MM yyyy HH mm ss) :"));
+end
+
+%Time vector resolution
+% time_bin = str2double(inputdlg("time bin ? (s)"));
+time_bin = 10; %Same size than Aplose annotations
 %% Time vector creation
 tic
 
 wavList = dir(fullfile(folder_data_wav, '*.wav'));
 wavNames = string(extractfield(wavList, 'name')');
-splitDates = split(wavNames, '.',2);
+splitDates = split(wavNames, [".","_"],2);
 wavDates = splitDates(:,2);
+
 wavDates_formated = datetime(wavDates, 'InputFormat', 'yyMMddHHmmss', 'Format', 'yyyy MM dd - HH mm ss');
 for i = 1:length(wavList)
     wavinfo(i) = audioinfo(strcat(folder_data_wav,"\",string(wavNames(i,:))));
 end
 
-% time_bin = str2double(inputdlg("time bin ? (s)"));
-time_bin = 60; %Same size than Aplose annotations
 
+switch choice
+    case 1
+        %Creation of a time vector from beginning of 1st file to end of last file with time_bin as a time step
+        nb_sec_begin_time = datenum(wavDates_formated(1))*24*3600; %in second
+        nb_sec_end_time = nb_sec_begin_time + sum(cell2mat({wavinfo(:).Duration})); %in second
+        % nb_sec_end_time = datenum(wavDates_formated(end))*24*3600 + wavinfo(end).Duration; %idk why this doesn't work the same
+    case 2
+        %OR Creation of a time vector with beginning and ending defined by user
+        %(used if the user does not want all data but just one deployement for instance)
+        nb_sec_begin_time = datenum(datetime(input1, 'InputFormat', 'dd MM yyyy HH mm ss', 'Format', 'yyyy MM dd - HH mm ss'))*24*3600;
+        nb_sec_end_time = datenum(datetime(input2, 'InputFormat', 'dd MM yyyy HH mm ss', 'Format', 'yyyy MM dd - HH mm ss'))*24*3600;
+end
 
-%Creation of a time vector from beginning of 1st file to end of last file with time_bin as a time step
-nb_sec_begin_time = datenum(wavDates_formated(1))*24*3600; %in second
-nb_sec_end_time = nb_sec_begin_time + sum(cell2mat({wavinfo(:).Duration})); %in second
-% nb_sec_end_time = datenum(wavDates_formated(end))*24*3600 + wavinfo(end).Duration; %idk why this doesn't work the same
-
-total_duration = nb_sec_end_time - nb_sec_begin_time;
+total_duration = nb_sec_end_time - nb_sec_begin_time ;
 last_bin = mod(total_duration,time_bin);
 
 %When creating the time vector, the last bin might not me stricly equal to the time_bin (e.i. 9.9s instead
 %of 10s for example) so we "manually" add the last timebin to the time vector. Otherwise, the time vector would lack the last bin
-time_vector = [[nb_sec_begin_time:time_bin:nb_sec_end_time]'; nb_sec_end_time+last_bin ];
-
+if last_bin == 0 
+    time_vector = [nb_sec_begin_time:time_bin:nb_sec_end_time]';
+else
+    time_vector = [[nb_sec_begin_time:time_bin:nb_sec_end_time]'; nb_sec_end_time+last_bin ];
+end
 export_time2Raven(folder_data_wav, time_vector, time_bin, last_bin) %Time vector as a Raven Table - For the sake of control
 
 elapsed_time.time_vector_creation = toc;
@@ -76,12 +106,40 @@ type_selected = opts(selection_type_data);
 tic
 counter = find(Ap_Annotation.annotation ~= type_selected);
 Ap_Annotation(counter,:)=[]; %Deletion of the annotations not correponding to the type of annotation selected by user
-
+Ap_Annotation = sortrows(Ap_Annotation, 5);
 
 nb_sec_begin_Ap = datenum(Ap_Annotation.start_datetime)*24*3600;
 duration_det = Ap_Annotation.end_time - Ap_Annotation.start_time;
 nb_sec_end_Ap = nb_sec_begin_Ap + duration_det;
 datenum_Ap = [nb_sec_begin_Ap, nb_sec_end_Ap]; %in second
+
+switch choice
+        case 2
+    interval_Ap_total = [nb_sec_begin_Ap(1), nb_sec_end_Ap(end)];
+    int_t_total = [time_vector(1), time_vector(end)];
+
+    overlap_total_Ap = intersection_vect(interval_Ap_total, int_t_total);
+    if overlap_total_Ap ~= 1
+        msg = sprintf('Error - No overlap between Aplose annotations (%s // %s)\n\nand user defined period (%s // %s)',...
+            datestr(nb_sec_begin_Ap(1)/(3600*24)), datestr(nb_sec_end_Ap(end)/(3600*24)), datestr(time_vector(1)/(3600*24)), datestr(time_vector(end)/(3600*24)) );
+        clc; disp(msg);
+        return
+    elseif overlap_total_Ap == 1
+        %on supprime les annotations dont les timestamps sont en dehors de l'intervalle de temps spécifiée par l'utilisateur
+        interval_Ap = [nb_sec_begin_Ap, nb_sec_end_Ap];
+        for i = 1:length(interval_Ap)-1
+            inter(i,1) = intersection_vect(interval_Ap(i,:), int_t_total); 
+        end
+        idx = find(inter~=1);
+        
+        if ~isempty(idx) %if idx is not empty then delete the indexes of datenum__Ap and Ap_Annotation with annotation outside of the time range of interest
+            datenum_Ap(idx,:) = [];  
+            Ap_Annotation(idx,:)=[];
+        end
+    end
+end
+
+
 
 % Creation of Aplose annotation table in Raven output format
 export_Aplose2Raven(Ap_Annotation, Ap_datapath, Ap_data_name, folder_data_wav, time_vector)
@@ -97,7 +155,38 @@ end
 
 nb_sec_begin_PG = datenum(PG_Annotation.datetime_begin) *24*3600;
 nb_sec_end_PG = datenum(PG_Annotation.datetime_end) *24*3600;
-datenum_PG = [nb_sec_begin_PG, nb_sec_end_PG]; %in second
+int_PG = [nb_sec_begin_PG, nb_sec_end_PG]; %in second
+
+switch choice
+    case 2
+        int_PG_total = [int_PG(1,1), int_PG(end,2)];
+
+%         overlap_total_PG = overlaps(int_PG_total, int_t_total);
+        overlap_total_PG = intersection_vect(int_PG_total, int_t_total);
+        if overlap_total_PG ~= 1
+            msg = sprintf('Error - No overlap between PAMGuard detections (%s // %s)\n\nand user defined period (%s // %s)',...
+                datestr(int_PG(1,1)/(3600*24)), datestr(int_PG(end,2)/(3600*24)), datestr(time_vector(1)/(3600*24)), datestr(time_vector(end)/(3600*24)) );
+            clc; disp(msg);
+            return
+        elseif overlap_total_PG == 1
+            %on supprime les annotations dont les timestamps sont en dehors de l'intervalle de temps spécifiée par l'utilisateur
+%             idx2 = find(intersection_vect( int_PG, int_t_total) ~=1); 
+            for i = 1:length(int_PG)
+                inter2(i,1) = intersection_vect(int_PG(i,:), int_t_total); 
+            end
+            idx2 = find(inter2~=1);
+            if ~isempty(idx2) %if idx2 is not empty then delete the indexes of int_PG and PG_Annotation with annotation outside of the time range of interest
+                int_PG(idx2,:) = [];
+                PG_Annotation(idx2,:) = [];
+            end
+        end
+end
+
+PG_Annotation.Begin_time = PG_Annotation.Begin_time+(nb_sec_begin_time-(datenum(wavDates_formated(1))*24*3600));
+PG_Annotation.End_time = PG_Annotation.End_time+(nb_sec_begin_time-(datenum(wavDates_formated(1))*24*3600));
+
+
+
 
 % Creation of PG detection table in Raven output format
 export_PG2Raven(PG_Annotation, folder_data_wav)
@@ -173,7 +262,7 @@ end
 PG_Annotation_formatted = table(start_time, end_time, start_frequency, end_frequency, start_datetime, end_datetime, annotation); %export format Aplose des detections PG
 
 export_Aplose2Raven(PG_Annotation_formatted, Ap_datapath, Ap_data_name, folder_data_wav, time_vector, ' - PamGuard2Raven formatted Selection Table.txt')
-elapsed_time.output_PG = toc
+elapsed_time.output_PG = toc;
 
 %% Results
 
@@ -204,6 +293,7 @@ nb_VN = length(find(comparison == "VN"));
 nb_VP = length(find(comparison == "VP"));
 nb_FP = length(find(comparison == "FP"));
 nb_FN = length(find(comparison == "FN"));
+nb_e = length(find(comparison == "erreur999"))+length(find(comparison == "erreur998"))+length(find(comparison == "erreur997"));
 
 Precision = nb_VP/(nb_VP + nb_FP);
 Recall = nb_VP/(nb_VP + nb_FN);
@@ -212,3 +302,13 @@ clc
 disp(['Precision : ', num2str(Precision), '; Recall : ', num2str(Recall)])
 elapsed_time
 
+%%
+% save('APOCADO C2D1 - Results.mat')
+
+
+%%
+% clear;
+% load('APOCADO C2D1 - Results.mat')
+% clc
+% disp(['Precision : ', num2str(Precision), '; Recall : ', num2str(Recall)])
+% elapsed_time
