@@ -25,16 +25,12 @@ opts = setvaropts(opts, ["filename", "start_time", "end_time", "start_frequency"
 % Import the data
 output1 = readtable(filename, opts);
 output1(1,:)=[];
+output1.segment = char(output1.filename);
 output1.filename = char(output1.filename);
 output1.filename = strcat(output1.filename(:,1:end-11), output1.filename(:,end-3:end));
 output1.filename = string(output1.filename);
 
 fmax = max(output1.end_frequency);
-
-% output_temp1 = char(output1.start_datetime);
-% output_temp2 = char(output1.end_datetime);
-% output_temp3 = split(output1.filename, [".","_"," - "]); %Mathieu
-% output_temp4 = strcat(output_temp3(:,2),'-',output_temp3(:,3)); %maelle
 
 for i = 1:length(output1.filename)
     idx_name(i,1) = find(output1.filename(i) == string({WavFolderInfo.wavList.name}') );

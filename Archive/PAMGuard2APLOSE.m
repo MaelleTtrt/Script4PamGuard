@@ -1,11 +1,11 @@
 %% Fonction qui permet de transformer les résultats de détection de PAMGuard
 % dans les fichiers binaires en output APLOSE
 clear;clc
-DATASET_NAME = "Glider_SPAms_60files_test_PAMGuard";
+DATASET_NAME = "APOCADO C2D1 - ST 336363566";
 % % DATASET_NAME = str2double(inputdlg("Dataset name ?"));
 Label= "whistle and moan";
 % % Label = str2double(inputdlg("Label ?"));
-Annotator = "mdupont";
+Annotator = "mdupon";
 % % Annotator = str2double(inputdlg("Annotator ?"));
 
 %Selection of the folder including the PAMGuard functions

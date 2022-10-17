@@ -205,8 +205,7 @@ elapsed_time.PG_vector_creation = toc;
 
 
 %% Output Aplose
-%The timevector is looked over, at every timebin we check if there is an
-%overlapping Aplose annotation, if so, output_Ap = 1, if not output_Ap = 0
+%The timevector
 if skip_Ap == 0
     tic
     interval_Ap = [datenum_begin_Ap+(0.1*time_bin/3600/24), datenum_end_Ap-(0.1*time_bin/3600/24)]; %Aplose annotations intervals +/-10% of time bin in order to avoid any overlap on several timebin
@@ -240,7 +239,6 @@ elapsed_time.output_Ap = toc;
 end
 
 %% Output PG
-%Same than previous section but with PG detections
 tic
 
 interval_PG = [datenum_begin_PG, datenum_end_PG]; %PG detection intervals
@@ -346,7 +344,7 @@ if skip_Ap == 0
     results.recall = results.nb_VP/(results.nb_VP + results.nb_FN);
 
     clc
-    disp(['Precision : ', num2str(results.precision), '; Recall : ', num2str(results.recall)])
+    % disp(['Precision : ', num2str(results.precision), '; Recall : ', num2str(results.recall)])
     % disp(results)
     % disp(elapsed_time)
 elseif skip_Ap == 1

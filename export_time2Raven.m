@@ -1,5 +1,5 @@
 function [] = export_time2Raven(folder_data_wav, WavFolderInfo, time_vector_datetime, time_bin, duration_det)
-
+%export_time2Raven(folder_result, WavFolderInfo, time_vector, time_bin, duration_time)
 Beg_sec = seconds(time_vector_datetime(1:end-1) - WavFolderInfo.wavDates_formated(1) );
 %time_vector(1:end-1) car le dernier timestamps est le dernier endtime, ce n'est pas un beg_time
 

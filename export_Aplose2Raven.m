@@ -1,4 +1,4 @@
-function [] = export_Aplose2Raven(WavFolderInfo, Ap_Annotation, Ap_datapath, Ap_data_name, folder_data_wav, string1)
+function [] = export_Aplose2Raven(WavFolderInfo, Ap_Annotation, folder_data_wav, string1)
 
 
 % datenum_files : variable avec les dates des detections en MATLAB
@@ -57,7 +57,7 @@ Channel = ones(L,1);
 
 C = [Selection, View, Channel, Beg_sec, End_sec, Low_freq, High_freq]';
 
-if nargin < 6
+if nargin < 4
     string1 = ' - APLOSE2Raven Selection Table.txt'
 end
 file_name = [strcat(folder_data_wav,'\', WavFolderInfo.txt_filename, string1)];
