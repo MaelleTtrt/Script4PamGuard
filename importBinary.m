@@ -1,4 +1,4 @@
-function [data_table, data_path, data_name] = importBinary(folder_data_wav, WavFolderInfo, folder_data_PG, index_exclude, time_vector)
+function [data_table, is_click] = importBinary(folder_data_wav, WavFolderInfo, folder_data_PG, index_exclude, time_vector)
 %Fonction qui permet d'extraire et de convertir les résultats de détection de PAMGuard binaires
 
 % Sampling frequency
@@ -42,6 +42,7 @@ selection_type_data=menu(msg,opts);
 
 if selection_type_data ~= 0
     type_data = opts(selection_type_data);
+    is_click = contains("Click,Clicks,click,clicks", split(opts(selection_type_data), [".","_"," - "],2)); %Test if detector is click detector
 else
     clc; disp("selection_type_data - Error");
     return
