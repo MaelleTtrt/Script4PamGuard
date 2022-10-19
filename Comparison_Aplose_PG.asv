@@ -8,13 +8,23 @@
 % % % % % %Aplose box, a PG box with the same timestamps is created.
 %The formatted PG vector and Aplose vector are then compared to estimate the performances of the PG detector   
 
-% Computation time ~1min for a 24h period
-
 clear;clc
+
+%If choice = 1, all the waves are analysed
+%If choice = 2, the user define a range of study
+%TODO : gérer erreurs input
+choice = 2;
+
+%Time vector resolution
+% time_bin = str2double(inputdlg("time bin ? (s)"));
+time_bin = 10; %Same size than Aplose annotations
+
+%If skip_Ap = 1, only PG detections are analysed
+skip_Ap = 0;
+
 
 %Add path with matlab functions from PG website
 addpath(genpath('U:\Documents\Pamguard\pgmatlab'));
-%Add path with matlab functions from PG website
 addpath(genpath('L:\acoustock\Bioacoustique\DATASETS\APOCADO\Code_MATLAB'));
 
 
@@ -23,6 +33,22 @@ folder_data_wav= uigetdir('','Select folder contening wav files');
 if folder_data_wav == 0
     clc; disp("Select folder contening wav files - Error");
     return
+end
+
+%data folder
+folder_data = fileparts(folder_data_wav);
+
+%Binary folder
+folder_data_PG = uigetdir(folder_data,'Select folder contening PAMGuard binary results');
+if folder_data_PG == 0
+    clc; disp("Select folder contening PAMGuard binary results - Error");
+    return
+end
+
+switch choice
+    case 2
+    input1 = datetime(string(inputdlg("Date & Time beginning (dd MM yyyy HH mm ss) :")), 'InputFormat', 'dd MM yyyy HH mm ss', 'Format', 'yyyy MM dd  - HH mm ss');
+    input2 = datetime(string(inputdlg("Date & Time beginning (dd MM yyyy HH mm ss) :")), 'InputFormat', 'dd MM yyyy HH mm ss', 'Format', 'yyyy MM dd  - HH mm ss');
 end
 
 %Infos from wav files
@@ -44,36 +70,48 @@ for i = 1:length(WavFolderInfo.wavList)
     WavFolderInfo.wavinfo(i) = audioinfo(strcat(folder_data_wav,"\",string(WavFolderInfo.wavNames(i,:))));
 end
 
+%File selection
+idx_file{1} = max(find(WavFolderInfo.wavDates_formated < input1));
+if isempty(idx_file{1})
+    idx_file_beg = 1;
+else
+    [min_val(1,1) min_idx(1,1)]= min(abs(input1-WavFolderInfo.wavDates_formated(idx_file{1}:idx_file{1}+1)));
+    if min_idx(1,1) == 1
+        idx_file_beg = idx_file{1};
+    elseif min_idx(1,1) == 2
+        idx_file_beg = idx_file{1}+1;
+    end
+end
+
+idx_file{2} = min(find(WavFolderInfo.wavDates_formated > input2));
+if isempty(idx_file{2})
+    idx_file_end = length(WavFolderInfo.wavDates_formated);
+else
+    [min_val(1,2) min_idx(1,2)]= min(abs(input1-WavFolderInfo.wavDates_formated(idx_file{2}-1:idx_file{2})));
+    if min_idx(1,2) == 1
+        idx_file_end = idx_file{2}-1;
+    elseif min_idx(1,2) == 2
+        idx_file_end = idx_file{2};
+    end
+end
+%%
+WavFolderInfo.wavList([1:idx_file_beg-1,idx_file_end+1:end])=[];
+WavFolderInfo.wavNames([1:idx_file_beg-1,idx_file_end+1:end])=[];
+WavFolderInfo.splitDates([1:idx_file_beg-1,idx_file_end+1:end])=[];
+WavFolderInfo.wavDates([1:idx_file_beg-1,idx_file_end+1:end])=[];
+WavFolderInfo.wavDates_formated([1:idx_file_beg-1,idx_file_end+1:end])=[];
+WavFolderInfo.wavinfo([1:idx_file_beg-1,idx_file_end+1:end])=[];
+
 Firstname = char(WavFolderInfo.wavNames(1));
 WavFolderInfo.txt_filename = string(Firstname(1,1:end-4));
 
-%data folder
-folder_data = fileparts(folder_data_wav);
+clc;disp(strcat("1st wav : ", WavFolderInfo.wavList(1).name))
+disp(strcat("last wav : ", WavFolderInfo.wavList(end).name))
+disp(strcat(str2num(length(WavFolderInfo.wavList)),"1st wav : ", WavFolderInfo.wavList(1).name))
 
-%Binary folder
-folder_data_PG = uigetdir(folder_data,'Select folder contening PAMGuard binary results');
-if folder_data_PG == 0
-    clc; disp("Select folder contening PAMGuard binary results - Error");
-    return
-end
 
-%If choice = 1, all the wave are analysed
-%If choice = 2, the user define a range of study
-%TODO : gérer erreurs input
-choice = 2;
-
-switch choice
-    case 2
-    input1 = datetime(string(inputdlg("Date & Time beginning (dd MM yyyy HH mm ss) :")), 'InputFormat', 'dd MM yyyy HH mm ss', 'Format', 'yyyy MM dd  - HH mm ss');
-    input2 = datetime(string(inputdlg("Date & Time beginning (dd MM yyyy HH mm ss) :")), 'InputFormat', 'dd MM yyyy HH mm ss', 'Format', 'yyyy MM dd  - HH mm ss');
-end
-
-%Time vector resolution
-% time_bin = str2double(inputdlg("time bin ? (s)"));
-time_bin = 10; %Same size than Aplose annotations
-
-%If skip_Ap = 1, only PG detections are analysed
-skip_Ap = 1;
+%%
+%Aplose result file
 if skip_Ap == 0
     %Aplose annotation csv file
     [Ap_data_name, Ap_datapath] = uigetfile(strcat(fileparts(folder_data_wav),'/*.csv'),'Select Aplose annotations');
@@ -179,7 +217,7 @@ if skip_Ap == 0
 end
 %% Creation of PG annotations vector
 tic
-PG_Annotation = importBinary(folder_data_wav, WavFolderInfo, folder_data_PG, index_exclude, time_vector);
+[PG_Annotation, is_click] = importBinary(folder_data_wav, WavFolderInfo, folder_data_PG, index_exclude, time_vector);
 if exist('PG_Annotation','var') == 0
     clc; disp("Select PG detections - Error");
     return
@@ -205,13 +243,14 @@ elapsed_time.PG_vector_creation = toc;
 
 
 %% Output Aplose
-%The timevector
+%The timevector is looked over, at every timebin we check if there is an
+%overlapping Aplose annotation, if so, output_Ap = 1, if not output_Ap = 0
 if skip_Ap == 0
     tic
     interval_Ap = [datenum_begin_Ap+(0.1*time_bin/3600/24), datenum_end_Ap-(0.1*time_bin/3600/24)]; %Aplose annotations intervals +/-10% of time bin in order to avoid any overlap on several timebin
     interval_time = [ datenum_time((1:end-1),1), datenum_time((2:end),1)]; %Time intervals
 
-    output_Ap = [];
+    output_Ap = false(length(interval_time),1);
     idx_overlap = [];
     k=1;
     for i = 1:length(interval_time)
@@ -229,9 +268,9 @@ if skip_Ap == 0
 %             overlap_rate(interval_time(i,:), interval_Ap(336,:))
             return
         elseif length(idx_overlap) == 1
-            output_Ap(i,1) = 1;
+            output_Ap(i,1) = true;
         elseif length(idx_overlap) == 0
-            output_Ap(i,1) = 0;
+            output_Ap(i,1) = false;
         end
         clc;disp([num2str(i),'/',num2str(length(interval_time))])
     end
@@ -239,12 +278,13 @@ elapsed_time.output_Ap = toc;
 end
 
 %% Output PG
+%Same than previous section but with PG detections
 tic
 
 interval_PG = [datenum_begin_PG, datenum_end_PG]; %PG detection intervals
 interval_time = [ datenum_time((1:end-1),1), datenum_time((2:end),1)]; %Time intervals
 
-output_PG = [];
+output_PG = false(length(interval_time),1);
 idx_overlap = [];
 k=1;
 for i = 1:length(interval_time)
@@ -257,12 +297,21 @@ for i = 1:length(interval_time)
     
     if ~isempty(idx_overlap)
         k = idx_overlap(end);
+        nb_overlap = length(idx_overlap);
     end
     
-    if length(idx_overlap) >= 1 %More than 1 overlap
-        output_PG(i,1) = 1;
+    %output_PG
+    %if a click detector is being analysed then is_click == 1 then for each timebin 
+    %output_PG will return the numbers of individual click detections.
+    %if is_click == 0, then output_PG returns 0 or 1 if there are detection
+    %for the timebin(i) or not.
+    if length(idx_overlap) >= 1  
+        output_PG(i,1) = true;
+        if is_click==1
+            nb_click(i,1) = nb_overlap;
+        end
     elseif length(idx_overlap) == 0
-        output_PG(i,1) = 0;
+        output_PG(i,1) = false;
     end
 
 
@@ -270,18 +319,19 @@ for i = 1:length(interval_time)
 end
 
 %Conversion from PG detection to Aplose equivalent boxes
-start_time = zeros( sum(output_PG),1 );
-start_frequency = zeros( sum(output_PG),1 );
-end_time = ones( sum(output_PG),1 )*time_bin;
-end_frequency = ones( sum(output_PG),1 )*60000;
+interval_PG_formatted = interval_time(find(output_PG),:);
+
+start_time = zeros( length(interval_PG_formatted),1 );
+start_frequency = zeros( length(interval_PG_formatted),1 );
+end_time = ones( length(interval_PG_formatted),1 )*time_bin;
+end_frequency = ones( length(interval_PG_formatted),1 )*60000;
 if skip_Ap == 0
-    annotation = repmat(type_selected,[sum(output_PG),1]);
+    annotation = repmat(type_selected,[length(interval_PG_formatted),1]);
 elseif skip_Ap == 1
     type_selected='whistle and moan detector';
-    annotation = repmat(type_selected,[sum(output_PG),1]);
+    annotation = repmat(type_selected,[length(interval_PG_formatted),1]);
 end
 
-interval_PG_formatted = interval_time(find(output_PG),:);
 
 clearvars start_datetime end_datetime
 for i = 1:length(interval_PG_formatted)
@@ -290,23 +340,31 @@ for i = 1:length(interval_PG_formatted)
 end
 PG_Annotation_formatted = table(start_time, end_time, start_frequency, end_frequency, start_datetime, end_datetime, annotation); %export format Aplose des detections PG
 
+if is_click == 1
+    threshold_click = 1*median(nb_click);
+    threshold_click2 = median(nb_click(output_Ap))
+
+    click_window = find(nb_click>threshold_click);
+    PG_Annotation_formatted_sorted = PG_Annotation_formatted(click_window,:);
+    bar(nb_click) %Amount of clik VS timebin
+%     yline(threshold_click) %Threshold
+%     yline(threshold_click*2) %Threshold
+%     yline(threshold_click2) %Threshold
+end
+
+
 elapsed_time.output_PG = toc;
 if skip_Ap == 0
     elapsed_time.total_elapsed  = elapsed_time.time_vector_creation + elapsed_time.Ap_vector_creation +elapsed_time.PG_vector_creation +elapsed_time.output_Ap +elapsed_time.output_PG;
 end
 
-dataset_name = "CETIROISE_pointB_Ph1_17072022";
-label= "whistle and moan";
-annotator = "PAMGuard";
-export_PG2Aplose(PG_Annotation_formatted,dataset_name, label, annotator, WavFolderInfo, folder_data_wav)
-
-
-
 %% Results
-output_Ap(index_exclude) = [];
+if skip_Ap == 0
+    output_Ap(index_exclude) = [];
+end
 output_PG(index_exclude) = [];
-time_vector(index_exclude) = [];
-duration_time(index_exclude) = [];
+% time_vector(index_exclude) = [];
+% duration_time(index_exclude) = [];
 
 
 if skip_Ap == 0
@@ -344,7 +402,7 @@ if skip_Ap == 0
     results.recall = results.nb_VP/(results.nb_VP + results.nb_FN);
 
     clc
-    % disp(['Precision : ', num2str(results.precision), '; Recall : ', num2str(results.recall)])
+    disp(['Precision : ', num2str(results.precision), '; Recall : ', num2str(results.recall)])
     % disp(results)
     % disp(elapsed_time)
 elseif skip_Ap == 1
@@ -354,53 +412,46 @@ elseif skip_Ap == 1
 end
 
 %% Save results
-if skip_Ap == 0
-    date_folder = char(datetime(now,'ConvertFrom','datenum','Format','MM-dd_HH-mm-ss'));
-    folder_result = strcat(folder_data_wav, '\Results\', date_folder, '\', annotator_selected);
-    mkdir(folder_result);
 
-    %
+date_folder = char(datetime(now,'ConvertFrom','datenum','Format','dd-MM_HHmmss'));
+folder_result = strcat(fileparts(folder_data_PG), '\Results\', date_folder);
+mkdir(folder_result);
+
+export_time2Raven(folder_result, WavFolderInfo, time_vector, time_bin, duration_time) %Time vector as Raven Table
+export_PG2Raven(PG_Annotation, folder_result, WavFolderInfo) %unformatted PG detection as Raven table
+export_Aplose2Raven(WavFolderInfo, PG_Annotation_formatted, folder_result, ' - PamGuard2Raven formatted Selection Table.txt') %Aplose-formatted PG detections as Raven table
+
+dataset_name = "ST335556632 C2D1";
+label= "whistle and moan detector";
+annotator = "PAMGuard";
+export_PG2Aplose(PG_Annotation_formatted,dataset_name, label, annotator, WavFolderInfo, folder_result) %Aplose-formatted PG detections as Aplose output file
+
+if skip_Ap == 0
+    
     D = [results.nb_total, results.nb_VP, results.nb_FP, results.nb_VN, results.nb_FN, results.precision, results.recall  ];
 
     file_name = [strcat(folder_result,'\', WavFolderInfo.txt_filename, ' - results_',date_folder,'.csv')];
     selec_table = fopen(file_name, 'wt');
-    fprintf(selec_table,'%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n %.0f\t%.0f\t%.0f\t%.0f\t%.0f\t%.0f\t%.0f\t%.4f\t%.4f\t%.0f\t', ...
+    fprintf(selec_table,'%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n %.0f\t%.0f\t%.0f\t%.0f\t%.0f\t%.0f\t%.0f\t%.4f\t%.4f\t%.0f\t',...
         'nb_total','nb_annotation','nb_detection', 'VP', 'FP', 'VN', 'FN', 'Precision', 'Recall', 'Elapsed time',...
         results.nb_total, sum(output_Ap), sum(output_PG), results.nb_VP, results.nb_FP, results.nb_VN, results.nb_FN, results.precision, results.recall, elapsed_time.total_elapsed);
     fclose('all');
 
-    %
+    %export output file
     x = [1:1:length(output_Ap)]';
-    y = [x, output_Ap, output_PG]';
+    if is_click == 1
+        nb_click2 = nb_click(setdiff(1:length(nb_click), index_exclude));
+        y = [x, output_Ap, nb_click2]';
+    else
+        y = [x, output_Ap, output_PG]';
+    end
     fileID = fopen(strcat(folder_result,'\', WavFolderInfo.txt_filename, ' - output_',date_folder,'.csv'),'w');
     fprintf(fileID,'%s \t%s \t%s\r\n','x','output_Ap','output_PG');
     fprintf(fileID,'%.0f\t %.0f\t %.0f\r\n', y);
     fclose(fileID);
 
-    %
-    export_time2Raven(folder_result, WavFolderInfo, time_vector, time_bin, duration_time) %Time vector as a Raven Table
-
-    export_Aplose2Raven(WavFolderInfo, Ap_Annotation , folder_result)
-
-    export_PG2Raven(PG_Annotation, folder_result, WavFolderInfo)
-
-    export_Aplose2Raven(WavFolderInfo, PG_Annotation_formatted, folder_result, ' - PamGuard2Raven formatted Selection Table.txt')
-
-    clc;disp("Results and tables saved");
-
-    % clearvars -except results elapsed_time output_PG output_Ap PG_Annotation Ap_Annotation folder_data_wav annotator_selected WavFolderInfo
-else
-    date_folder = char(datetime(now,'ConvertFrom','datenum','Format','MM-dd_HH-mm-ss'));
-    folder_result = strcat(folder_data_wav, '\Results PG\', date_folder);
-    mkdir(folder_result);
-    
-    export_time2Raven(folder_result, WavFolderInfo, time_vector, time_bin, duration_time) %Time vector as a Raven Table
-
-
-    export_PG2Raven(PG_Annotation, folder_result, WavFolderInfo)
-
-    export_Aplose2Raven(WavFolderInfo, PG_Annotation_formatted, folder_result, ' - PamGuard2Raven formatted Selection Table.txt')
-
-    clc;disp("Results and tables saved");
+    export_Aplose2Raven(WavFolderInfo, Ap_Annotation , folder_result) %export Aplose annotation as Raven table
     
 end
+
+clc;disp("Results and tables saved");
