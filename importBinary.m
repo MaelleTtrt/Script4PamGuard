@@ -1,4 +1,4 @@
-function [data_table, is_click] = importBinary(folder_data_wav, WavFolderInfo, folder_data_PG, index_exclude, time_vector)
+function [data_table, is_click] = importBinary(folder_data_wav, WavFolderInfo, folder_data_PG, index_exclude, time_vector, TZ)
 %Fonction qui permet d'extraire et de convertir les résultats de détection de PAMGuard binaires
 
 % Sampling frequency
@@ -16,6 +16,7 @@ end
 % PG_Dates = PG_Names_temp(:,end-19:end-5);
 PG_Names = string(PG_Names_temp);
 PG_Dates_formated = datetime(PG_Dates, 'InputFormat', 'yyyyMMdd_HHmmss', 'Format', 'yyyy MM dd - HH mm ss');
+PG_Dates_formated.TimeZone = TZ;
 [FirstDate, posMin] = min(PG_Dates_formated);
 datenum_1stF = datenum(FirstDate);
 
@@ -58,6 +59,7 @@ datenum_det = cell2mat(datenum_det);
 
 WavFolderInfo.wavDates_formated;
 data_datetime = datetime(datenum_det','ConvertFrom','datenum');
+data_datetime.TimeZone = TZ;
 
 idx_wav=[];
 for i=1:length(data)
@@ -88,7 +90,8 @@ duration_det = cell2mat(duration_det)/Fs;
 
 datetime_begin = datetime(datenum_det','ConvertFrom','datenum','Format','yyyy MM dd - HH mm ss');
 datetime_end = datetime_begin + seconds(duration_det);
-
+datetime_begin.TimeZone = TZ;
+datetime_end.TimeZone = TZ;
 
 
 % Nombre de secondes entre le debut de la liste de fichiers et le debut de chaque detection 

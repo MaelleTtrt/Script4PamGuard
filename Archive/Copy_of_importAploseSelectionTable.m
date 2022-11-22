@@ -37,13 +37,13 @@ for i = 1:length(output1.filename)
     output1.filename_formated(i) = WavFolderInfo.wavDates_formated(idx_name(i));
 end
 
-% output1.start_datetime = strrep(output1.start_datetime,'T',' ');
-% output1.start_datetime = strrep(output1.start_datetime,'+00:00',' ');
-% output1.end_datetime = strrep(output1.end_datetime,'T',' ');
-% output1.end_datetime = strrep(output1.end_datetime,'+00:00',' ');
+output1.start_datetime = strrep(output1.start_datetime,'T',' ');
+output1.start_datetime = strrep(output1.start_datetime,'+00:00',' ');
+output1.end_datetime = strrep(output1.end_datetime,'T',' ');
+output1.end_datetime = strrep(output1.end_datetime,'+00:00',' ');
 
-output1.start_datetime = datetime(output1.start_datetime, 'Format', 'yyyy MM dd - HH mm ss','InputFormat','yyyy-MM-dd''T''HH:mm:ss.SSSx','TimeZone','local');
-output1.end_datetime = datetime(output1.end_datetime, 'Format', 'yyyy MM dd - HH mm ss','InputFormat','yyyy-MM-dd''T''HH:mm:ss.SSSx','TimeZone','local');
+output1.start_datetime = datetime(output1.start_datetime, 'Format', 'yyyy MM dd - HH mm ss');
+output1.end_datetime = datetime(output1.end_datetime, 'Format', 'yyyy MM dd - HH mm ss');
 
 
 % output1.filename = datetime(output_temp3(:,2),'InputFormat', 'yyMMddHHmmss','Format', 'yyyy MM dd - HH mm ss');   %Mathieu 
@@ -73,8 +73,6 @@ for i =1:height(output1)
         output1.end_datetime(i) =   output1.end_datetime(i) +  adjust;
     end
 end
-
-
 
 
 end

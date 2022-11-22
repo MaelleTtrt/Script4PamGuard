@@ -48,7 +48,7 @@ end
 switch choice
     case 2
     input1 = datetime(string(inputdlg("Date & Time beginning (dd MM yyyy HH mm ss) :")), 'InputFormat', 'dd MM yyyy HH mm ss', 'Format', 'yyyy MM dd  - HH mm ss');
-    input2 = datetime(string(inputdlg("Date & Time beginning (dd MM yyyy HH mm ss) :")), 'InputFormat', 'dd MM yyyy HH mm ss', 'Format', 'yyyy MM dd  - HH mm ss');
+    input2 = datetime(string(inputdlg("Date & Time end (dd MM yyyy HH mm ss) :")), 'InputFormat', 'dd MM yyyy HH mm ss', 'Format', 'yyyy MM dd  - HH mm ss');
 end
 
 %Infos from wav files
@@ -94,7 +94,9 @@ else
         idx_file_end = idx_file{2};
     end
 end
-%%
+
+n_file_tot = length(WavFolderInfo.wavList);
+
 WavFolderInfo.wavList([1:idx_file_beg-1,idx_file_end+1:end])=[];
 WavFolderInfo.wavNames([1:idx_file_beg-1,idx_file_end+1:end])=[];
 WavFolderInfo.splitDates([1:idx_file_beg-1,idx_file_end+1:end])=[];
@@ -107,10 +109,9 @@ WavFolderInfo.txt_filename = string(Firstname(1,1:end-4));
 
 clc;disp(strcat("1st wav : ", WavFolderInfo.wavList(1).name))
 disp(strcat("last wav : ", WavFolderInfo.wavList(end).name))
-disp(strcat(str2num(length(WavFolderInfo.wavList)),"1st wav : ", WavFolderInfo.wavList(1).name))
+disp(strcat(num2str(length(WavFolderInfo.wavList)),"/", num2str(n_file_tot), " files"))
 
 
-%%
 %Aplose result file
 if skip_Ap == 0
     %Aplose annotation csv file
@@ -162,6 +163,7 @@ elapsed_time.time_vector_creation = toc;
 %% Creation of Aplose annotation vector
 if skip_Ap == 0
     Ap_Annotation = importAploseSelectionTable(strcat(Ap_datapath,Ap_data_name),WavFolderInfo, time_vector, index_exclude);
+%     Ap_Annotation = importAploseSelectionTable(strcat(Ap_datapath,Ap_data_name),WavFolderInfo, time_vector);
 
     %Selection of the annotator
     msg_annotator='Select the annotator';
@@ -264,8 +266,19 @@ if skip_Ap == 0
         end
         
         if length(idx_overlap) > 1 %More than 1 overlap
-            disp(['More than one overlap at interval_Ap(j) with j =  ',num2str(j)])
-%             overlap_rate(interval_time(i,:), interval_Ap(336,:))
+            disp(['More than one overlap : '])
+            disp(['   interval_time(i) with i = ',num2str(i)])
+            disp(['   interval_Ap(j) with j =  ',num2str(idx_overlap')])
+            
+%             lines to help debugging:
+%             datetime(interval_time(i,:), 'ConvertFrom', 'datenum')
+%             datetime(interval_Ap(382,:), 'ConvertFrom', 'datenum')
+%             datetime(interval_Ap(383,:), 'ConvertFrom', 'datenum')
+%             intersection_vect(interval_time(i,:), interval_Ap(382,:))
+%             intersection_vect(interval_time(i,:), interval_Ap(383,:))
+%             overlap_rate(interval_time(i,:), interval_Ap(382,:))
+%             overlap_rate(interval_time(i,:), interval_Ap(383,:))
+
             return
         elseif length(idx_overlap) == 1
             output_Ap(i,1) = true;
@@ -407,6 +420,10 @@ if skip_Ap == 0
     % disp(elapsed_time)
 elseif skip_Ap == 1
     clc
+    results.total = height(output_PG);
+    results.detection = height(PG_Annotation_formatted);
+    results.detection_rate = height(PG_Annotation_formatted)/height(output_PG)*100;
+    
     disp(['total : ', num2str(height(output_PG)), '; détection : ', num2str(height(PG_Annotation_formatted)),...
         '; détection : ', num2str(height(PG_Annotation_formatted)/height(output_PG)*100),'%'])
 end
@@ -414,7 +431,7 @@ end
 %% Save results
 
 date_folder = char(datetime(now,'ConvertFrom','datenum','Format','dd-MM_HHmmss'));
-folder_result = strcat(fileparts(folder_data_PG), '\Results\', date_folder);
+folder_result = strcat(Ap_datapath, 'Results\', date_folder);
 mkdir(folder_result);
 
 export_time2Raven(folder_result, WavFolderInfo, time_vector, time_bin, duration_time) %Time vector as Raven Table
@@ -454,4 +471,8 @@ if skip_Ap == 0
     
 end
 
-clc;disp("Results and tables saved");
+clc;disp(strcat("Results and tables saved in ", folder_result));
+fprintf('\nResults :\n')
+disp(results)
+fprintf('\nElapsed time :\n')
+disp(elapsed_time)

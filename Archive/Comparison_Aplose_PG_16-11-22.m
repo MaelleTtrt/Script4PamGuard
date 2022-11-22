@@ -50,10 +50,6 @@ switch choice
     input1 = datetime(string(inputdlg("Date & Time beginning (dd MM yyyy HH mm ss) :")), 'InputFormat', 'dd MM yyyy HH mm ss', 'Format', 'yyyy MM dd  - HH mm ss');
     input2 = datetime(string(inputdlg("Date & Time end (dd MM yyyy HH mm ss) :")), 'InputFormat', 'dd MM yyyy HH mm ss', 'Format', 'yyyy MM dd  - HH mm ss');
 end
-TZ = 'Europe/Paris';
-
-input1.TimeZone = TZ;
-input2.TimeZone = TZ;
 
 %Infos from wav files
 WavFolderInfo.wavList = dir(fullfile(folder_data_wav, '*.wav'));
@@ -62,13 +58,13 @@ WavFolderInfo.splitDates = split(WavFolderInfo.wavNames, [".","_"," - "],2);
 
 %%%%%%%%%%%% TO ADAPT ACCORDING TO FILENAME %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-WavFolderInfo.wavDates = WavFolderInfo.splitDates(:,2); %APOCACO
-WavFolderInfo.wavDates_formated = datetime(WavFolderInfo.wavDates, 'InputFormat', 'yyMMddHHmmss', 'Format', 'yyyy MM dd - HH mm ss'); %APOCADO
-% WavFolderInfo.wavDates = strcat(WavFolderInfo.splitDates(:,2),'-',WavFolderInfo.splitDates(:,3)); %CETIROISE
-% WavFolderInfo.wavDates_formated = datetime(WavFolderInfo.wavDates, 'InputFormat', 'yyyy-MM-dd-HH-mm-ss', 'Format', 'yyyy MM dd - HH mm ss');%CETIROISE
+% WavFolderInfo.wavDates = WavFolderInfo.splitDates(:,2); %APOCACO
+% WavFolderInfo.wavDates_formated = datetime(WavFolderInfo.wavDates, 'InputFormat', 'yyMMddHHmmss', 'Format', 'yyyy MM dd - HH mm ss'); %APOCADO
+WavFolderInfo.wavDates = strcat(WavFolderInfo.splitDates(:,2),'-',WavFolderInfo.splitDates(:,3)); %CETIROISE
+WavFolderInfo.wavDates_formated = datetime(WavFolderInfo.wavDates, 'InputFormat', 'yyyy-MM-dd-HH-mm-ss', 'Format', 'yyyy MM dd - HH mm ss');%CETIROISE
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-WavFolderInfo.wavDates_formated.TimeZone = TZ;
+
 
 for i = 1:length(WavFolderInfo.wavList)
     WavFolderInfo.wavinfo(i) = audioinfo(strcat(folder_data_wav,"\",string(WavFolderInfo.wavNames(i,:))));
@@ -167,7 +163,6 @@ elapsed_time.time_vector_creation = toc;
 %% Creation of Aplose annotation vector
 if skip_Ap == 0
     Ap_Annotation = importAploseSelectionTable(strcat(Ap_datapath,Ap_data_name),WavFolderInfo, time_vector, index_exclude);
-%     Ap_Annotation = importAploseSelectionTable(strcat(Ap_datapath,Ap_data_name),WavFolderInfo, time_vector);
 
     %Selection of the annotator
     msg_annotator='Select the annotator';
@@ -211,9 +206,6 @@ if skip_Ap == 0
         Ap_Annotation(idx2,:) = [];
     end
 
-    %check overlap
-    Ap_Annotation = overlap_check(Ap_Annotation);
-    pause(2)
 
     datenum_begin_Ap = datenum(Ap_Annotation.start_datetime);
     datenum_end_Ap = datenum(Ap_Annotation.end_datetime);
@@ -224,12 +216,9 @@ if skip_Ap == 0
 
     elapsed_time.Ap_vector_creation = toc;
 end
-
-
-
 %% Creation of PG annotations vector
 tic
-[PG_Annotation, is_click] = importBinary(folder_data_wav, WavFolderInfo, folder_data_PG, index_exclude, time_vector, TZ);
+[PG_Annotation, is_click] = importBinary(folder_data_wav, WavFolderInfo, folder_data_PG, index_exclude, time_vector);
 if exist('PG_Annotation','var') == 0
     clc; disp("Select PG detections - Error");
     return
@@ -268,7 +257,7 @@ if skip_Ap == 0
     for i = 1:length(interval_time)
         inter=[];
         for j = k:length(interval_Ap)
-            inter(j,1) = cell2mat(intersection_vect(interval_time(i,:), interval_Ap(j,:)) ) ;
+            inter(j,1) = intersection_vect(interval_time(i,:), interval_Ap(j,:))  ;
         end
         idx_overlap = find(inter==1); %indexes of overlapping Ap annotations(j) with timebox(i)
         if ~isempty(idx_overlap)
@@ -276,20 +265,8 @@ if skip_Ap == 0
         end
         
         if length(idx_overlap) > 1 %More than 1 overlap
-            disp(['More than one overlap : '])
-            disp(['   interval_time(i) with i = ',num2str(i)])
-            disp(['   interval_Ap(j) with j =  ',num2str(idx_overlap')])
-            
-%             lines to help debugging:
-%             datetime(interval_time(i,:), 'ConvertFrom', 'datenum')
-%             datetime(interval_Ap(382,:), 'ConvertFrom', 'datenum')
-%             datetime(interval_Ap(383,:), 'ConvertFrom', 'datenum')
-%             intersection_vect(interval_time(i,:), interval_Ap(382,:))
-%             intersection_vect(interval_time(i,:), interval_time(i,:))
-%             intersection_vect(interval_time(i,:), interval_Ap(383,:))
-%             overlap_rate(interval_time(i,:), interval_Ap(382,:))
-%             overlap_rate(interval_time(i,:), interval_Ap(383,:))
-
+            disp(['More than one overlap at interval_Ap(j) with j =  ',num2str(j)])
+%             overlap_rate(interval_time(i,:), interval_Ap(1225,:))
             return
         elseif length(idx_overlap) == 1
             output_Ap(i,1) = true;
@@ -314,7 +291,7 @@ k=1;
 for i = 1:length(interval_time)
     inter=[];
     for j = k:length(interval_PG)
-        inter(j,1) = cell2mat(intersection_vect(interval_time(i,:), interval_PG(j,:)))  ;
+        inter(j,1) = intersection_vect(interval_time(i,:), interval_PG(j,:))  ;
     end
 
     idx_overlap = find(inter==1); %indexes of overlapping PG detections(j) with timebox(i)

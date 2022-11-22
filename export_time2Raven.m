@@ -9,7 +9,7 @@ End_sec = Beg_sec + duration_det(1:end);
 
 
 % Generate Raven selection Table with appropriate format
-L = height(time_vector_datetime)-1;
+L = length(time_vector_datetime)-1;
 Selection = [1:L]';
 View = ones(L,1);
 Channel = ones(L,1);
