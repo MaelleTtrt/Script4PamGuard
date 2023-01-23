@@ -2,16 +2,13 @@
 clear;clc
 
 % User inputs
-% TZ = '+02:00';
 TZ = 'Europe/Paris'; %TimeZone
-
+TZ = '+02:00'; %TimeZone
 infoAplose.annotator = "PAMGuard";
 infoAplose.annotation = "Whistle and moan detector";
 infoAplose.dataset = "APOCADO C2D4 ST6632(10_144000)";
-
 % GeneralFolderWav = 'L:\acoustock\Bioacoustique\DATASETS\CETIROISE\DATA\B_Sud Fosse Ouessant\Phase_1\Sylence';
 GeneralFolderWav = 'L:\acoustock\Bioacoustique\DATASETS\APOCADO\PECHEURS_2022_PECHDAUPHIR_APOCADO\Campagne 2\IROISE\335556632\wav';
-
 % GeneralFolderBinary = 'L:\acoustock\Bioacoustique\DATASETS\CETIROISE\ANALYSE\PAMGUARD_threshold_7\PHASE_1_POINT_B\Binary';
 GeneralFolderBinary = 'L:\acoustock\Bioacoustique\DATASETS\APOCADO\PECHEURS_2022_PECHDAUPHIR_APOCADO\Campagne 2\IROISE\335556632\analysis\C2D4\PG Binary';
 

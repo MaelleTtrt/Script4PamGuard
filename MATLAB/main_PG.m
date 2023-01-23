@@ -1,4 +1,4 @@
-function [] = main_PG(infoAp, wavPath, BinaryPath)
+function [] = main_PG(infoAp, wavPath, BinaryPath, TZ)
 
 %% This script import binary files info and export it as an Aplose csv & Raven selection table
 start = now;
@@ -9,8 +9,7 @@ start = now;
 % infoAplose.dataset = "CETIROISE_POINT_B (10_128000)";
 infoAplose = infoAp;
 
-%TimeZone
-TZ = 'Europe/Paris';
+
 
 %Add path with matlab functions from PG website
 addpath(genpath('L:\acoustock\Bioacoustique\DATASETS\APOCADO\Code_MATLAB'));
