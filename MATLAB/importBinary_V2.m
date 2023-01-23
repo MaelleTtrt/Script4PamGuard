@@ -130,7 +130,7 @@ filename = WavFolderInfo.wavNames(idx_wav);
 
 data_table_Aplose = [ array2table([dataset, filename, Beg_sec, End_sec, Low_freq, High_freq, annotation, annotator],...
     'VariableNames',{'dataset', 'filename', 'start_time','end_time','start_frequency','end_frequency', 'annotation', 'annotator'})...
-    , table(datetime_begin_str, datetime_end_str, 'VariableNames',{'datetime_begin','datetime_end'})];
+    , table(datetime_begin_str, datetime_end_str, 'VariableNames',{'start_datetime','end_datetime'})];
 
 data_table_Aplose = sortrows(data_table_Aplose, 'datetime_begin');
 
