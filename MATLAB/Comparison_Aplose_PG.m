@@ -10,7 +10,7 @@
 
 clear;clc
 
-%If choice = 1, all the waves are analysed
+%If choice = 1, all the wav are analysed
 %If choice = 2, the user define a range of study
 %TODO : gérer erreurs input
 choice = 2;
@@ -62,10 +62,10 @@ WavFolderInfo.splitDates = split(WavFolderInfo.wavNames, [".","_"," - "],2);
 
 %%%%%%%%%%%% TO ADAPT ACCORDING TO FILENAME %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-WavFolderInfo.wavDates = WavFolderInfo.splitDates(:,2); %APOCACO
-WavFolderInfo.wavDates_formated = datetime(WavFolderInfo.wavDates, 'InputFormat', 'yyMMddHHmmss', 'Format', 'yyyy MM dd - HH mm ss'); %APOCADO
-% WavFolderInfo.wavDates = strcat(WavFolderInfo.splitDates(:,2),'-',WavFolderInfo.splitDates(:,3)); %CETIROISE
-% WavFolderInfo.wavDates_formated = datetime(WavFolderInfo.wavDates, 'InputFormat', 'yyyy-MM-dd-HH-mm-ss', 'Format', 'yyyy MM dd - HH mm ss');%CETIROISE
+% WavFolderInfo.wavDates = WavFolderInfo.splitDates(:,2); %APOCACO
+% WavFolderInfo.wavDates_formated = datetime(WavFolderInfo.wavDates, 'InputFormat', 'yyMMddHHmmss', 'Format', 'yyyy MM dd - HH mm ss'); %APOCADO
+WavFolderInfo.wavDates = strcat(WavFolderInfo.splitDates(:,2),'-',WavFolderInfo.splitDates(:,3)); %CETIROISE
+WavFolderInfo.wavDates_formated = datetime(WavFolderInfo.wavDates, 'InputFormat', 'yyyy-MM-dd-HH-mm-ss', 'Format', 'yyyy MM dd - HH mm ss');%CETIROISE
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 WavFolderInfo.wavDates_formated.TimeZone = TZ;
@@ -281,14 +281,14 @@ if skip_Ap == 0
             disp(['   interval_Ap(j) with j =  ',num2str(idx_overlap')])
             
 %             lines to help debugging:
-%             datetime(interval_time(i,:), 'ConvertFrom', 'datenum')
-%             datetime(interval_Ap(382,:), 'ConvertFrom', 'datenum')
-%             datetime(interval_Ap(383,:), 'ConvertFrom', 'datenum')
-%             intersection_vect(interval_time(i,:), interval_Ap(382,:))
-%             intersection_vect(interval_time(i,:), interval_time(i,:))
-%             intersection_vect(interval_time(i,:), interval_Ap(383,:))
-%             overlap_rate(interval_time(i,:), interval_Ap(382,:))
-%             overlap_rate(interval_time(i,:), interval_Ap(383,:))
+            datetime(interval_time(i,:), 'ConvertFrom', 'datenum')
+            datetime(interval_Ap(4,:), 'ConvertFrom', 'datenum')
+            datetime(interval_Ap(5,:), 'ConvertFrom', 'datenum')
+            intersection_vect(interval_time(i,:), interval_Ap(4,:))
+            intersection_vect(interval_time(i,:), interval_time(i,:))
+            intersection_vect(interval_time(i,:), interval_Ap(5,:))
+            overlap_rate(interval_time(i,:), interval_Ap(4,:))
+            overlap_rate(interval_time(i,:), interval_Ap(5,:))
 
             return
         elseif length(idx_overlap) == 1

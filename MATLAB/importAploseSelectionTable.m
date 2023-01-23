@@ -42,8 +42,8 @@ end
 % output1.end_datetime = strrep(output1.end_datetime,'T',' ');
 % output1.end_datetime = strrep(output1.end_datetime,'+00:00',' ');
 
-output1.start_datetime = datetime(output1.start_datetime, 'Format', 'yyyy MM dd - HH mm ss','InputFormat','yyyy-MM-dd''T''HH:mm:ss.SSSx','TimeZone','local');
-output1.end_datetime = datetime(output1.end_datetime, 'Format', 'yyyy MM dd - HH mm ss','InputFormat','yyyy-MM-dd''T''HH:mm:ss.SSSx','TimeZone','local');
+output1.start_datetime = datetime(output1.start_datetime, 'Format', 'yyyy MM dd - HH mm ss','InputFormat','yyyy-MM-dd''T''HH:mm:ss.SSSx','TimeZone','Europe/Paris');
+output1.end_datetime = datetime(output1.end_datetime, 'Format', 'yyyy MM dd - HH mm ss','InputFormat','yyyy-MM-dd''T''HH:mm:ss.SSSx','TimeZone','Europe/Paris');
 
 
 % output1.filename = datetime(output_temp3(:,2),'InputFormat', 'yyMMddHHmmss','Format', 'yyyy MM dd - HH mm ss');   %Mathieu 
