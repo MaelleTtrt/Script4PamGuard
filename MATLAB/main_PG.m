@@ -1,15 +1,9 @@
 function [] = main_PG(infoAp, wavPath, BinaryPath, TZ)
-
-%% This script import binary files info and export it as an Aplose csv & Raven selection table
+%% This function import binary files info and export it as an Aplose csv & Raven selection table
 start = now;
 
 %Info for the Aplose table to be created
-% infoAplose.annotator = "PAMGuard";
-% infoAplose.annotation = "Whistle and moan detector";
-% infoAplose.dataset = "CETIROISE_POINT_B (10_128000)";
 infoAplose = infoAp;
-
-
 
 %Add path with matlab functions from PG website
 addpath(genpath('L:\acoustock\Bioacoustique\DATASETS\APOCADO\Code_MATLAB'));
@@ -32,10 +26,10 @@ WavFolderInfo.splitDates = split(WavFolderInfo.wavNames, [".","_"," - "],2);
 
 %%%%%%%%%%%% TO ADAPT ACCORDING TO FILENAME %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-WavFolderInfo.wavDates = WavFolderInfo.splitDates(:,2); %APOCACO
-WavFolderInfo.wavDates_formated = datetime(WavFolderInfo.wavDates, 'InputFormat', 'yyMMddHHmmss', 'Format', 'yyyy-MM-dd''T''HH:mm:ss.SSSZ', 'TimeZone', TZ); %APOCADO
-% WavFolderInfo.wavDates = strcat(WavFolderInfo.splitDates(:,2),'-',WavFolderInfo.splitDates(:,3)); %CETIROISE
-% WavFolderInfo.wavDates_formated = datetime(WavFolderInfo.wavDates, 'InputFormat', 'yyyy-MM-dd-HH-mm-ss', 'Format', 'yyyy-MM-dd''T''HH:mm:ss.SSSZ', 'TimeZone', TZ);%CETIROISE
+% WavFolderInfo.wavDates = WavFolderInfo.splitDates(:,2); %APOCACO
+% WavFolderInfo.wavDates_formated = datetime(WavFolderInfo.wavDates, 'InputFormat', 'yyMMddHHmmss', 'Format', 'yyyy-MM-dd''T''HH:mm:ss.SSSZ', 'TimeZone', TZ); %APOCADO
+WavFolderInfo.wavDates = strcat(WavFolderInfo.splitDates(:,2),'-',WavFolderInfo.splitDates(:,3)); %CETIROISE
+WavFolderInfo.wavDates_formated = datetime(WavFolderInfo.wavDates, 'InputFormat', 'yyyy-MM-dd-HH-mm-ss', 'Format', 'yyyy-MM-dd''T''HH:mm:ss.SSSZ', 'TimeZone', TZ);%CETIROISE
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
