@@ -1,16 +1,9 @@
-function [] = main_PG(infoAp, wavPath, BinaryPath)
-
-%% This script import binary files info and export it as an Aplose csv & Raven selection table
+function [] = main_PG(infoAp, wavPath, BinaryPath, TZ)
+%% This function import binary files info and export it as an Aplose csv & Raven selection table
 start = now;
 
 %Info for the Aplose table to be created
-% infoAplose.annotator = "PAMGuard";
-% infoAplose.annotation = "Whistle and moan detector";
-% infoAplose.dataset = "CETIROISE_POINT_B (10_128000)";
 infoAplose = infoAp;
-
-%TimeZone
-TZ = 'Europe/Paris';
 
 %Add path with matlab functions from PG website
 addpath(genpath('L:\acoustock\Bioacoustique\DATASETS\APOCADO\Code_MATLAB'));
@@ -26,7 +19,7 @@ folder_data_PG = BinaryPath;
 %Infos from wav files
 WavFolderInfo.wavList = dir(fullfile(folder_data_wav, '/**/*.wav'));
 T = struct2table(WavFolderInfo.wavList);
-WavFolderInfo.wavList = table2struct(sortrows(T, 'datenum')); %Sort the wav files by their datenum
+WavFolderInfo.wavList = table2struct(sortrows(T, 'name')); %Sort the wav files by their names
 WavFolderInfo.wavNames = string(extractfield(WavFolderInfo.wavList, 'name')');
 WavFolderInfo.folder = string(extractfield(WavFolderInfo.wavList, 'folder')');
 WavFolderInfo.splitDates = split(WavFolderInfo.wavNames, [".","_"," - "],2);
