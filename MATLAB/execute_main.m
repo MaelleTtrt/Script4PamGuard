@@ -7,14 +7,14 @@ TZ = 'Europe/Paris'; %TimeZone
 
 infoAplose.annotator = "PAMGuard";
 infoAplose.annotation = "Whistle and moan detector";
-% infoAplose.dataset = "APOCADO C2D3 ST3566(10_144000)";
-infoAplose.dataset = "CETIROISE Point_B Phase_1";
+infoAplose.dataset = "APOCADO C2D3 ST3566(10_144000)";
+% infoAplose.dataset = "CETIROISE Point_B Phase_1";
 
-GeneralFolderWav = 'L:\acoustock\Bioacoustique\DATASETS\CETIROISE\DATA\B_Sud Fosse Ouessant\Phase_1\Sylence';
-% GeneralFolderWav = 'L:\acoustock\Bioacoustique\DATASETS\APOCADO\PECHEURS_2022_PECHDAUPHIR_APOCADO\Campagne 2\IROISE\336363566\wav';
+% GeneralFolderWav = 'L:\acoustock\Bioacoustique\DATASETS\CETIROISE\DATA\B_Sud Fosse Ouessant\Phase_1\Sylence';
+GeneralFolderWav = 'L:\acoustock\Bioacoustique\DATASETS\APOCADO\PECHEURS_2022_PECHDAUPHIR_APOCADO\Campagne 2\IROISE\336363566\wav';
 
-GeneralFolderBinary = 'L:\acoustock\Bioacoustique\DATASETS\CETIROISE\ANALYSE\PAMGUARD_threshold_7\PHASE_1_POINT_B\Binary';
-% GeneralFolderBinary = 'L:\acoustock\Bioacoustique\DATASETS\APOCADO\PECHEURS_2022_PECHDAUPHIR_APOCADO\Campagne 2\IROISE\336363566\analysis\C2D3\PG Binary';
+% GeneralFolderBinary = 'L:\acoustock\Bioacoustique\DATASETS\CETIROISE\ANALYSE\PAMGUARD_threshold_7\PHASE_1_POINT_B\Binary';
+GeneralFolderBinary = 'L:\acoustock\Bioacoustique\DATASETS\APOCADO\PECHEURS_2022_PECHDAUPHIR_APOCADO\Campagne 2\IROISE\336363566\analysis\C2D3\PG Binary';
 
 
 % Get files - Automatic
