@@ -1,4 +1,4 @@
-function [] = main_PG(infoAp, wavPath, BinaryPath, TZ)
+function [] = main_PG2APLOSE(infoAp, wavPath, BinaryPath, TZ)
 %% This function import binary files info and export it as an Aplose csv & Raven selection table
 start = now;
 
@@ -127,7 +127,7 @@ elapsed_time = (stop-start)*24*3600;
 clc
 disp(['Raw data files exported in : ', folder_data_PG])
 fprintf('\n')
-disp(['Elapsed time : ',num2str(elapsed_time,3), ' s'])
+disp(['Elapsed time : ',num2str(uint64(elapsed_time)), ' s'])
 
 
 
