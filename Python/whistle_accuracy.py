@@ -4,13 +4,11 @@ import datetime as dt
 import pytz
 import glob
 from tkinter import filedialog
-import tkinter as tk
 from tkinter import Tk
 import pandas as pd
 import sys
 import numpy as np
 import time
-import easygui
 sys.path.append('U:/Documents/Git/spyder_scripts')
 from def_func import read_header, extract_datetime, from_str2dt, from_str2ts, sorting_annot_boxes, t_rounder
 

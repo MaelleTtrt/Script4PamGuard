@@ -8,14 +8,13 @@ TZ = 'Europe/Paris'; %TimeZone
 %info written on Aplose csv file
 infoAplose.annotator = "PAMGuard";
 infoAplose.annotation = "Whistle and moan detector";
-infoAplose.dataset = "CETIROISE Point_E Ph_1 25_07 (10_128000)";
-% infoAplose.dataset = "CETIROISE Point_B Phase_1";
+infoAplose.dataset = "APOCADO C2D1_070722 (10_144000)";
 
-GeneralFolderWav = uigetdir2('L:\acoustock\Bioacoustique\DATASETS\CETIROISE\DATA\E_Nord Chenal de la Helle\Phase_1\Sylence')
+GeneralFolderWav = uigetdir2('L:\acoustock\Bioacoustique\DATASETS')
 % GeneralFolderWav = 'L:\acoustock\Bioacoustique\DATASETS\CETIROISE\DATA\E_Nord Chenal de la Helle\Phase_1\Sylence\2022-07-25';
 % GeneralFolderWav = 'L:\acoustock\Bioacoustique\DATASETS\APOCADO\PECHEURS_2022_PECHDAUPHIR_APOCADO\Campagne 2\IROISE\335556632\wav';
 
-GeneralFolderBinary = uigetdir2('L:\acoustock\Bioacoustique\DATASETS\CETIROISE\ANALYSE\PAMGUARD_threshold_7\PHASE_1_POINT_B\Binary');
+GeneralFolderBinary = uigetdir2('L:\acoustock\Bioacoustique\DATASETS');
 % GeneralFolderBinary = 'L:\acoustock\Bioacoustique\DATASETS\APOCADO\PECHEURS_2022_PECHDAUPHIR_APOCADO\Campagne 2\IROISE\335556632\analysis\C2D1_070722\PG Binary';
 
 
@@ -42,7 +41,7 @@ subFoldersBinary = string(unique(extractfield(GeneralFolderBinaryInfo, 'folder')
 %of selected data and use main_PG in a loop
 % /!\ input parameters 2 and 3 must be char type, not string type
 
-main_PG2APLOSE(infoAplose, GeneralFolderWav, GeneralFolderBinary, TZ);
+main_PG2APLOSE(infoAplose, GeneralFolderWav{1}, GeneralFolderBinary{1}, TZ);
 
 
 
