@@ -5,26 +5,34 @@ clear;clc
 % TZ = '+02:00';
 TZ = 'Europe/Paris'; %TimeZone
 
+%info written on Aplose csv file
 infoAplose.annotator = "PAMGuard";
 infoAplose.annotation = "Whistle and moan detector";
-infoAplose.dataset = "APOCADO C2D3 ST3566(10_144000)";
-% infoAplose.dataset = "CETIROISE Point_B Phase_1";
+infoAplose.dataset = "APOCADO C2D1_070722 (10_144000)";
 
-% GeneralFolderWav = 'L:\acoustock\Bioacoustique\DATASETS\CETIROISE\DATA\B_Sud Fosse Ouessant\Phase_1\Sylence';
-GeneralFolderWav = 'L:\acoustock\Bioacoustique\DATASETS\APOCADO\PECHEURS_2022_PECHDAUPHIR_APOCADO\Campagne 2\IROISE\336363566\wav';
+GeneralFolderWav = uigetdir2('L:\acoustock\Bioacoustique\DATASETS')
+% GeneralFolderWav = 'L:\acoustock\Bioacoustique\DATASETS\CETIROISE\DATA\E_Nord Chenal de la Helle\Phase_1\Sylence\2022-07-25';
+% GeneralFolderWav = 'L:\acoustock\Bioacoustique\DATASETS\APOCADO\PECHEURS_2022_PECHDAUPHIR_APOCADO\Campagne 2\IROISE\335556632\wav';
 
-% GeneralFolderBinary = 'L:\acoustock\Bioacoustique\DATASETS\CETIROISE\ANALYSE\PAMGUARD_threshold_7\PHASE_1_POINT_B\Binary';
-GeneralFolderBinary = 'L:\acoustock\Bioacoustique\DATASETS\APOCADO\PECHEURS_2022_PECHDAUPHIR_APOCADO\Campagne 2\IROISE\336363566\analysis\C2D3\PG Binary';
+GeneralFolderBinary = uigetdir2('L:\acoustock\Bioacoustique\DATASETS');
+% GeneralFolderBinary = 'L:\acoustock\Bioacoustique\DATASETS\APOCADO\PECHEURS_2022_PECHDAUPHIR_APOCADO\Campagne 2\IROISE\335556632\analysis\C2D1_070722\PG Binary';
 
 
 % Get files - Automatic
-GeneralFolderWavInfo = dir(fullfile(GeneralFolderWav, '/**/*.wav'));
+% GeneralFolderWavInfo = dir(fullfile(GeneralFolderWav, '/**/*.wav'));
+
+GeneralFolderWavInfo = [];
+for i = 1:length(GeneralFolderWav)
+    GeneralFolderWavInfo = [GeneralFolderWavInfo; dir(fullfile(GeneralFolderWav{i}, '/**/*.wav'))];
+end
 subFoldersWav = string(unique(extractfield(GeneralFolderWavInfo, 'folder')'));
 
-GeneralFolderBinaryInfo = dir(fullfile(GeneralFolderBinary, '/**/*.pgdf'));
+% GeneralFolderBinaryInfo = dir(fullfile(GeneralFolderBinary, '/**/*.pgdf'));
+GeneralFolderBinaryInfo = [];
+for i = 1:length(GeneralFolderWav)
+    GeneralFolderBinaryInfo = [GeneralFolderBinaryInfo; dir(fullfile(GeneralFolderBinary{i}, '/**/*.pgdf'))];
+end
 subFoldersBinary = string(unique(extractfield(GeneralFolderBinaryInfo, 'folder')'));
-
-
 
 
 %% Execution of main
@@ -33,7 +41,7 @@ subFoldersBinary = string(unique(extractfield(GeneralFolderBinaryInfo, 'folder')
 %of selected data and use main_PG in a loop
 % /!\ input parameters 2 and 3 must be char type, not string type
 
-main_PG(infoAplose, GeneralFolderWav, GeneralFolderBinary, TZ);
+main_PG2APLOSE(infoAplose, GeneralFolderWav{1}, GeneralFolderBinary{1}, TZ);
 
 
 
